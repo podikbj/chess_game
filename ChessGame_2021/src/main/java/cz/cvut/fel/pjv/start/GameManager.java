@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -31,36 +32,38 @@ public class GameManager {
 
     private static GameManager instance = null;
 
-    private List<Tile> tileList = new ArrayList<Tile>();
+    private LinkedList<Tile> tileList = new LinkedList<Tile>();
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
-    private static Logger logger = Logger.getLogger(GameManager.class.getName());
-    private static Handler fileHandler = null;
     private Piece[] wPieceses = new Piece[8];
     private Piece[] bPieceses = new Piece[8];
-    private boolean ReportIsFirstInUse = false;
-    private Tile[][] tileArray = new Tile[8][8];
+    //private Tile[][] tileArray = new Tile[8][8];
     //private static Player activePlayer;
 
-    public static GameManager getInstance() throws IOException {
+    public static GameManager getInstance() {
         if (instance == null) {
             instance = new GameManager();
             // activePlayer = player;
         }
         return instance;
     }
+    
+    private GameManager() {
+        initializeTiles();
+        initializePieces();
+    }
 
     private Tile createTile(int color, int x, int y) {
         Tile tile = new Tile(color, x, y);
         tileList.add(tile);
-        tileArray[x][y] = tile;
+        //tileArray[x][y] = tile;
         return tile;
     }
 
     private void initializeTiles() {
-        int color = 0;
-        for (int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
+       // int color = 0;
+        for (int j = 7; j >= 0; j--) {
+            for (int i = 0; i < 8; i++) {
                 if (i % 2 != 0) {
                     if (j % 2 != 0) {
                         createTile(0, i, j);
@@ -80,60 +83,60 @@ public class GameManager {
         }
     }
 
-    private void addPiecesToList(int color) {
+    private void addTilesToList(int color) {
 
         if (color == 0) {
             tempTileList = tileList.stream()
-                    .filter(p -> p.getY() == 8)
+                    .filter(p -> p.getY() == 7)
                     .sorted(Comparator.comparing(Tile::getX))
                     .collect(toList());
         }
 
         if (color == 1) {
             tempTileList = tileList.stream()
-                    .filter(p -> p.getY() == 1)
+                    .filter(p -> p.getY() == 0)
                     .sorted(Comparator.comparing(Tile::getX))
                     .collect(toList());
         }
     }
 
     private void setPieceOnTile(int color) {
-        int x = 1;
+        int x = 0;
         Piece[] tempPieceses = new Piece[8];
         for (Tile el : tempTileList) {
             x = el.getX();
             switch (x) {
+                case (0):
+                    tempPieceses[x] = new Rook(color);
+                    el.setCurrentPiece(tempPieceses[x]);
+                    break;
                 case (1):
-                    tempPieceses[x - 1] = new Rook(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Knight(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (2):
-                    tempPieceses[x - 1] = new Knight(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Bishop(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (3):
-                    tempPieceses[x - 1] = new Bishop(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new King(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (4):
-                    tempPieceses[x - 1] = new King(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Queen(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (5):
-                    tempPieceses[x - 1] = new Queen(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Bishop(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (6):
-                    tempPieceses[x - 1] = new Bishop(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Knight(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
                 case (7):
-                    tempPieceses[x - 1] = new Knight(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
-                    break;
-                case (8):
-                    tempPieceses[x - 1] = new Rook(color);
-                    el.setCurrentPiece(tempPieceses[x - 1]);
+                    tempPieceses[x] = new Rook(color);
+                    el.setCurrentPiece(tempPieceses[x]);
                     break;
             }
         }
@@ -149,13 +152,14 @@ public class GameManager {
     private void initializePieces() {
 
         final int black = 0;
-        tileList.stream().filter(p -> p.getY() == 7).forEach(p -> p.setCurrentPiece(new Pawn(black)));
-        addPiecesToList(black);
+        tileList.stream().filter(p -> p.getY() == 6).forEach(p -> p.setCurrentPiece(new Pawn(black)));
+        addTilesToList(black);
         setPieceOnTile(black);
 
         final int white = 1;
-        tileList.stream().filter(p -> p.getY() == 2).forEach(p -> p.setCurrentPiece(new Pawn(white)));
+        tileList.stream().filter(p -> p.getY() == 1).forEach(p -> p.setCurrentPiece(new Pawn(white)));
         tempTileList.clear();
+        addTilesToList(white);
         setPieceOnTile(white);
 
     }
@@ -166,7 +170,7 @@ public class GameManager {
             //whiteInCheck();
             //whiteCheckMated();
         }
-        if (currentPiece.getColor() == 1) {
+        if (currentPiece.getColor() == 0) {
             //blackInCheck();
             //blackCheckMated();
         }
@@ -176,7 +180,7 @@ public class GameManager {
         }
     }
 
-    public List<Tile> getTileList() {
+    public LinkedList<Tile> getTileList() {
         return tileList;
     }
 
@@ -184,44 +188,49 @@ public class GameManager {
         return moveSequence;
     }
 
-    private void createReport() throws IOException {
-        Date dateNow = new Date();
-        SimpleDateFormat formatDate = new SimpleDateFormat("YYYY.MM.DD");
+//    private void createReport() throws IOException {
+//        Date dateNow = new Date();
+//        SimpleDateFormat formatDate = new SimpleDateFormat("YYYY.MM.DD");
+//
+//        File myFile = new File(formatDate + "Game.txt");
+//
+//        if (ReportIsFirstInUse == false) {
+//            try {
+//                PrintWriter writer = new PrintWriter(myFile);
+//                logger.info("Clearing the contents of the Reports.txt file starts");
+//                writer.print("");
+//                writer.close();
+//            } catch (Exception e) {
+//                logger.log(Level.SEVERE, "Error occur in file cleaning", e);
+//            }
+//            ReportIsFirstInUse = true;
+//        }
+//
+//        try {
+//            PrintWriter writer = new PrintWriter(myFile);
+//            logger.info("Printing GameReport to file starts");
+//
+////            writer.println("============================================================");
+////            writer.println("HOUSE CONFIGURATION REPORT");
+////            writer.println("============================================================");
+//            int counter = 1;
+//            for (String str : moveSequence) {
+//                str = counter + ". " + str;
+//                writer.println(str);
+//                counter += 1;
+//            }
+//            writer.flush();
+//            writer.close();
+//        } catch (IOException ex) {
+//            logger.log(Level.SEVERE, "Error occur in printing GameReport", ex);
+//            ex.printStackTrace();
+//        }
+//
+//    }
 
-        File myFile = new File(formatDate + "Game.txt");
+//    public Tile[][] getTileArray() {
+//        return tileArray;
+//    }
 
-        if (ReportIsFirstInUse == false) {
-            try {
-                PrintWriter writer = new PrintWriter(myFile);
-                logger.info("Clearing the contents of the Reports.txt file starts");
-                writer.print("");
-                writer.close();
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "Error occur in file cleaning", e);
-            }
-            ReportIsFirstInUse = true;
-        }
-
-        try {
-            PrintWriter writer = new PrintWriter(myFile);
-            logger.info("Printing GameReport to file starts");
-
-            writer.println("============================================================");
-            writer.println("HOUSE CONFIGURATION REPORT");
-            writer.println("============================================================");
-            int counter = 1;
-            for (String str : moveSequence) {
-                str = counter + ". " + str;
-                writer.println(str);
-                counter += 1;
-            }
-            writer.flush();
-            writer.close();
-        } catch (IOException ex) {
-            logger.log(Level.SEVERE, "Error occur in printing GameReport", ex);
-            ex.printStackTrace();
-        }
-
-    }
-
+    
 }
