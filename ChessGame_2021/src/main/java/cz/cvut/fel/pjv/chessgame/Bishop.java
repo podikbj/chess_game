@@ -6,11 +6,12 @@ import java.util.List;
 public class Bishop extends Piece {
 
     public Bishop(int color) {
-        super(color);
+        super(color, "src/main/resources/bbishop.png" , "src/main/resources/wbishop.png");
+
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
+    public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
         if (isDiagonalMove(finTile)) {
             boolean findOccupiedTiles = isAnyTileIsOccupiedDiagonalMove(finTile);
@@ -24,5 +25,11 @@ public class Bishop extends Piece {
         boolean b = true;
         return b;
     }
+
+    @Override
+    public String toString() {
+        return "B";
+    }
+    
 
 }

@@ -8,14 +8,14 @@ public class Pawn extends Piece {
     private boolean wasMoved = false;
 
     public Pawn(int color) {
-        super(color);
+        super(color, "src/main/resources/bpawn.png", "src/main/resources/wpawn.png");
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
+    public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
-        
+
         int diffX = finTile.getX() - currentTile.getX();
         int diffY = finTile.getY() - currentTile.getY();
 
@@ -34,7 +34,7 @@ public class Pawn extends Piece {
             b = true;
         }
 
-        if (!finTile.getIsEmpty()&& Math.abs(diffY) == 1 && Math.abs(diffX) == 1) {
+        if (!finTile.getIsEmpty() && Math.abs(diffY) == 1 && Math.abs(diffX) == 1) {
             b = true;
         }
         return b;
@@ -45,6 +45,11 @@ public class Pawn extends Piece {
         boolean b = super.move(finTile);
         wasMoved = true;
         return b;
+    }
+
+    @Override
+    public String toString() {
+        return "P";
     }
 
 }

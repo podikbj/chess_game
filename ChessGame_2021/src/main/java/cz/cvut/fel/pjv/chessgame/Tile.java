@@ -48,8 +48,10 @@ public class Tile {
         return isEmpty;
     }
 
-    public void removePiece(Piece piece) {
+    public void removePiece() {
         this.currentPiece = null;
+        isEmpty = true;
+        
     }
 
     public void setCurrentPiece(Piece currentPiece) {

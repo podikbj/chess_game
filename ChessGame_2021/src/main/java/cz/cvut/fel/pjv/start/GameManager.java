@@ -35,8 +35,8 @@ public class GameManager {
     private LinkedList<Tile> tileList = new LinkedList<Tile>();
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
-    private Piece[] wPieceses = new Piece[8];
-    private Piece[] bPieceses = new Piece[8];
+   //private Piece[] wPieceses = new Piece[8];
+    //private Piece[] bPieceses = new Piece[8];
     //private Tile[][] tileArray = new Tile[8][8];
     //private static Player activePlayer;
 
@@ -141,11 +141,11 @@ public class GameManager {
             }
         }
 
-        if (color == 1) {
-            wPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
-        } else {
-            bPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
-        }
+//        if (color == 1) {
+//            wPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
+//        } else {
+//            bPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
+//        }
 
     }
 
@@ -175,7 +175,7 @@ public class GameManager {
             //blackCheckMated();
         }
 
-        if (currentPiece.isMoveLegal(finTile)) {
+        if (currentPiece.isMoveAllowed(finTile)) {
             currentPiece.move(finTile);
         }
     }

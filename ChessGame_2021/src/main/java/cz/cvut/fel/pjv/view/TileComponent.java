@@ -18,6 +18,7 @@ public class TileComponent extends JComponent {
     private int xC = 0;
     private int yC = 0;
     private int color;
+    public boolean displayPiece;
 
     public TileComponent(BoardPanel boardPanel, Tile currentTile) {
 
@@ -26,7 +27,8 @@ public class TileComponent extends JComponent {
         this.yC = currentTile.getX();
         this.xC = currentTile.getY();
         this.color = currentTile.getColor();
-     }
+        this.displayPiece = true;
+    }
 
     public void paintComponent(Graphics g) {
 
@@ -40,20 +42,24 @@ public class TileComponent extends JComponent {
 
         g.fillRect(this.getX(), this.getY(), this.getWidth(), this.getHeight());
 
-        if (!currentTile.getIsEmpty()) {
+        if (!currentTile.getIsEmpty() && displayPiece) {
 
-            BufferedImage img = null;
-            String img_file = currentTile.getCurrentPiece().getPath();
+            BufferedImage pieceImage = null;
+            String imageFilePath = currentTile.getCurrentPiece().getPath();
             try {
-                if (img == null) {
-                    img = ImageIO.read(new File(img_file));
+                if (pieceImage == null) {
+                    pieceImage = ImageIO.read(new File(imageFilePath));
                 }
             } catch (IOException e) {
                 System.out.println("File not found: " + e.getMessage());
             }
 
-            g.drawImage(img, xC, yC, null);
+            g.drawImage(pieceImage, xC, yC, null);
         }
+    }
+
+    public Tile getCurrentTile() {
+        return currentTile;
     }
 
 }

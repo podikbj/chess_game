@@ -6,12 +6,12 @@ import java.util.List;
 public class Queen extends Piece {
 
     public Queen(int color) {
-        super(color);
+        super(color, "src/main/resources/bqueen.png", "src/main/resources/wqueen.png");
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
-        
+    public boolean isMoveAllowed(Tile finTile) {
+
         boolean b = false;
         boolean areOccupiedTiles = true;
 
@@ -34,6 +34,11 @@ public class Queen extends Piece {
     public boolean move(Tile finTile) {
         boolean b = true;
         return b;
+    }
+
+    @Override
+    public String toString() {
+        return "Q";
     }
 
 }

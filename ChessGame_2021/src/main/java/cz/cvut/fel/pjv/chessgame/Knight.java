@@ -6,11 +6,13 @@ import java.util.List;
 public class Knight extends Piece {
 
     public Knight(int color) {
-        super(color);
+
+        super(color, "src/main/resources/bknight.png", "src/main/resources/wknight.png");
+     
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
+    public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
         if ( isVerticalMove(finTile) || isHorizontalMove(finTile) ) {
@@ -35,6 +37,11 @@ public class Knight extends Piece {
     public boolean move(Tile finTile) {
         boolean b = true;
         return b;
+    }
+    
+        @Override
+    public String toString() {
+        return "N";
     }
 
 }

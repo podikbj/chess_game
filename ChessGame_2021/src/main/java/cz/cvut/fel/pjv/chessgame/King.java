@@ -6,13 +6,13 @@ import java.util.List;
 public class King extends Piece {
 
     private boolean wasMoved = false;
-    
+
     public King(int color) {
-        super(color);
+        super(color, "src/main/resources/bking.png", "src/main/resources/wking.png");
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
+    public boolean isMoveAllowed(Tile finTile) {
         // check position for another king, they can not be in adjacent tiles
         boolean b = false;
         boolean areOccupiedTiles = true;
@@ -37,6 +37,11 @@ public class King extends Piece {
         boolean b = true;
         wasMoved = true;
         return b;
+    }
+
+    @Override
+    public String toString() {
+        return "K";
     }
 
 }

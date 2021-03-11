@@ -4,15 +4,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Rook extends Piece {
-    
+
     private boolean wasMoved = false;
 
     public Rook(int color) {
-        super(color);
+        super(color, "src/main/resources/brook.png", "src/main/resources/wrook.png");
     }
 
     @Override
-    public boolean isMoveLegal(Tile finTile) {
+    public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
         boolean areOccupiedTiles = true;
 
@@ -23,7 +23,7 @@ public class Rook extends Piece {
         if (isVerticalMove(finTile)) {
             areOccupiedTiles = isAnyTileIsOccupiedVerticalMove(finTile);
         }
-        
+
         b = !areOccupiedTiles;
         return b;
     }
@@ -33,6 +33,11 @@ public class Rook extends Piece {
         boolean b = true;
         wasMoved = true;
         return b;
+    }
+
+    @Override
+    public String toString() {
+        return "R";
     }
 
 }
