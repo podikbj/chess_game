@@ -46,7 +46,7 @@ public class GameWindow {
 
     private JMenu createFileMenu() {
         final JMenu fileMenu = new JMenu("File");
-        final JMenuItem openPNG = new JMenuItem("Open PNG file");
+        final JMenuItem openPNG = new JMenuItem("Open PGN file");
         openPNG.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

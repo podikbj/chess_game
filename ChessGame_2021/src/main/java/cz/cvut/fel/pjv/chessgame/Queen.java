@@ -13,6 +13,7 @@ public class Queen extends Piece {
     public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
+        if (super.isTheSameColor(currentTile, finTile)) {return b; }
         boolean areOccupiedTiles = true;
 
         if (isHorizontalMove(finTile)) {
@@ -32,7 +33,7 @@ public class Queen extends Piece {
 
     @Override
     public boolean move(Tile finTile) {
-        boolean b = true;
+        boolean b = super.move(finTile);
         return b;
     }
 

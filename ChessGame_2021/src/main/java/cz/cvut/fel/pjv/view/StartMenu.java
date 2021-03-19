@@ -20,7 +20,6 @@ public class StartMenu implements Runnable {
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
                 new GameWindow();
                 startWindow.dispose();
             }
@@ -31,7 +30,7 @@ public class StartMenu implements Runnable {
 
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startWindow.setVisible(true);
-        // 
+
 
     }
 

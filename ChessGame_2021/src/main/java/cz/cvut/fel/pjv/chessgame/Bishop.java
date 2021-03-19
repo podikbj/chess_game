@@ -12,7 +12,9 @@ public class Bishop extends Piece {
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
+        
         boolean b = false;
+        if (super.isTheSameColor(currentTile, finTile)) {return b; }
         if (isDiagonalMove(finTile)) {
             boolean findOccupiedTiles = isAnyTileIsOccupiedDiagonalMove(finTile);
             b = !findOccupiedTiles;
@@ -22,7 +24,7 @@ public class Bishop extends Piece {
 
     @Override
     public boolean move(Tile finTile) {
-        boolean b = true;
+        boolean b = super.move(finTile);
         return b;
     }
 

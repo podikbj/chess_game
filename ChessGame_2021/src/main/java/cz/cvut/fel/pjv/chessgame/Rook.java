@@ -14,6 +14,7 @@ public class Rook extends Piece {
     @Override
     public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
+        if (super.isTheSameColor(currentTile, finTile)) {return b; }
         boolean areOccupiedTiles = true;
 
         if (isHorizontalMove(finTile)) {
@@ -30,7 +31,7 @@ public class Rook extends Piece {
 
     @Override
     public boolean move(Tile finTile) {
-        boolean b = true;
+        boolean b = super.move(finTile);
         wasMoved = true;
         return b;
     }

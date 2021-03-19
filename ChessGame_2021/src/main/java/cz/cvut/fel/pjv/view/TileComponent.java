@@ -18,7 +18,7 @@ public class TileComponent extends JComponent {
     private int xC = 0;
     private int yC = 0;
     private int color;
-    public boolean displayPiece;
+    private boolean displayPiece;
 
     public TileComponent(BoardPanel boardPanel, Tile currentTile) {
 
@@ -32,7 +32,7 @@ public class TileComponent extends JComponent {
 
     public void paintComponent(Graphics g) {
 
-        super.paintComponent(g);
+        //super.paintComponent(g);
 
         if (this.color == 1) {
             g.setColor(new Color(221, 192, 127));
@@ -61,5 +61,15 @@ public class TileComponent extends JComponent {
     public Tile getCurrentTile() {
         return currentTile;
     }
+
+    public boolean isDisplayPiece() {
+        return displayPiece;
+    }
+
+    public void setDisplayPiece(boolean displayPiece) {
+        this.displayPiece = displayPiece;
+    }
+    
+    
 
 }

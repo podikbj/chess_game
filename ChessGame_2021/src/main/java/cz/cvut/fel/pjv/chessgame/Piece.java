@@ -4,9 +4,11 @@ import cz.cvut.fel.pjv.start.GameManager;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import javax.imageio.ImageIO;
 
@@ -16,6 +18,8 @@ public abstract class Piece {
     protected Tile currentTile;
     protected String imageFilePath;
     private BufferedImage pieceImage;
+    //private GameManager gameManager = GameManager.getInstance();
+    //private GameManager gameManager;
 
     public Piece(int color, String blackPiecePath, String whitePiecePath) {
         this.color = color;
@@ -27,97 +31,187 @@ public abstract class Piece {
         } catch (IOException e) {
             System.out.println("File not found: " + e.getMessage());
         }
+
     }
 
     public abstract boolean isMoveAllowed(Tile finTile);
 
-    protected boolean isDiagonalMove(Tile finTile) {
+    public boolean isDiagonalMove(Tile finTile) {
         return (Math.abs(finTile.getX() - currentTile.getX()) == Math.abs(finTile.getY() - currentTile.getY()));
     }
 
-    protected boolean isVerticalMove(Tile finTile) { // x const
-        return finTile.getY() == currentTile.getY();
+    public boolean isVerticalMove(Tile finTile) { // x const
+        return (finTile.getX() == currentTile.getX() && finTile.getY() != currentTile.getY()) ;
     }
 
-    protected boolean isHorizontalMove(Tile finTile) { // x const
-        return finTile.getX() == currentTile.getX();
+    public boolean isHorizontalMove(Tile finTile) { // x const
+   
+        return (finTile.getY() == currentTile.getY() && finTile.getX() != currentTile.getX());
     }
 
     protected boolean isAnyTileIsOccupiedHorizontalMove(Tile finTile) {
-        GameManager gameManager;
+
         boolean b = false;
-        //      try {
-        gameManager = GameManager.getInstance();
+        GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
-                .filter(p -> p.getX() == currentTile.getX())
-                .filter(p -> p.getY() > currentTile.getY())
-                .filter(p -> p.getY() <= finTile.getY())
+//                .filter(p -> p.getX() == currentTile.getX())
+//                .filter(p -> p.getY() > currentTile.getY())
+//                .filter(p -> p.getY() < finTile.getY())
+                    .filter(p -> p.getY() == currentTile.getY())
+                    .filter((p)
+                            -> {
+                        boolean x = false;
+                        if (currentTile.getX() > finTile.getX()) {
+                            x = (p.getX() > finTile.getX() && p.getX() < currentTile.getX());
+                        }
+                        if (currentTile.getX() < finTile.getX()) {
+                            x = (p.getX() < finTile.getX() && p.getX() > currentTile.getX());
+                        }
+                        return x;
+                    }
+                    )
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Piece.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+
         return b;
     }
 
     protected boolean isAnyTileIsOccupiedVerticalMove(Tile finTile) {
-        GameManager gameManager;
+
         boolean b = false;
-        //      try {
-        gameManager = GameManager.getInstance();
+        GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
-                .filter(p -> p.getY() == currentTile.getY())
-                .filter(p -> p.getX() > currentTile.getX())
-                .filter(p -> p.getX() <= finTile.getX())
+//                .filter(p -> p.getY() == currentTile.getY())
+                //                .filter(p -> p.getX() > currentTile.getX())
+                //                .filter(p -> p.getX() < finTile.getX())
+                
+                    .filter(p -> p.getX() == currentTile.getX())
+                    .filter((p)
+                            -> {
+                        boolean y = false;
+                        if (currentTile.getY() > finTile.getY()) {
+                            y = (p.getY() > finTile.getY() && p.getY() < currentTile.getY());
+                        }
+                        if (currentTile.getY() < finTile.getY()) {
+                            y = (p.getY() < finTile.getY() && p.getY() > currentTile.getY());
+                        }
+                        return y;
+                    }
+                    )
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Piece.class.getName()).log(Level.SEVERE, null, ex);
-//        }
         return b;
     }
 
     protected boolean isAnyTileIsOccupiedDiagonalMove(Tile finTile) {
-        GameManager gameManager;
-        boolean b = false;
-        //      try {
-        gameManager = GameManager.getInstance();
-        List<Tile> tileList = gameManager.getTileList();
 
-        b = tileList.stream()
-                .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
-                .filter(p -> !p.getIsEmpty())
-                .findAny().isPresent();
-//        } catch (IOException ex) {
-//            Logger.getLogger(Piece.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+        boolean b = false;
+        GameManager gameManager = GameManager.getInstance();
+        List<Tile> tileList = gameManager.getTileList();
+        if (finTile.getX() > currentTile.getX()) {
+            if (finTile.getY() > currentTile.getY()) {
+                b = tileList.stream()
+                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+                        .filter(p -> p.getX() > currentTile.getX())
+                        .filter(p -> p.getY() > currentTile.getY())
+                        .filter(p -> p.getX() < finTile.getX())
+                        .filter(p -> p.getY() < finTile.getY())
+                        .filter(p -> !p.getIsEmpty())
+                        .findAny().isPresent();
+
+//                List<Tile> newList = tileList.stream()
+//                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+//                        .filter(p -> p.getX() > currentTile.getX())
+//                        .filter(p -> p.getY() > currentTile.getY())
+//                        .filter(p -> p.getX() <= finTile.getX())
+//                        .filter(p -> p.getY() <= finTile.getY())
+//                        .collect(Collectors.toList());
+//                for (Tile t : newList) {
+//                    System.out.println("x: " + t.getX() + ", y: " + t.getY());
+//                }
+            }
+            if (finTile.getY() < currentTile.getY()) {
+                b = tileList.stream()
+                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+                        .filter(p -> p.getX() > currentTile.getX())
+                        .filter(p -> p.getY() < currentTile.getY())
+                        .filter(p -> p.getX() < finTile.getX())
+                        .filter(p -> p.getY() > finTile.getY())
+                        .filter(p -> !p.getIsEmpty())
+                        .findAny().isPresent();
+            }
+        }
+        if (finTile.getX() < currentTile.getX()) {
+            if (finTile.getY() > currentTile.getY()) {
+                b = tileList.stream()
+                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+                        .filter(p -> p.getX() < currentTile.getX())
+                        .filter(p -> p.getY() > currentTile.getY())
+                        .filter(p -> p.getX() > finTile.getX())
+                        .filter(p -> p.getY() < finTile.getY())
+                        .filter(p -> !p.getIsEmpty())
+                        .findAny().isPresent();
+            }
+            if (finTile.getY() < currentTile.getY()) {
+                b = tileList.stream()
+                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+                        .filter(p -> p.getX() < currentTile.getX())
+                        .filter(p -> p.getY() < currentTile.getY())
+                        .filter(p -> p.getX() > finTile.getX())
+                        .filter(p -> p.getY() > finTile.getY())
+                        .filter(p -> !p.getIsEmpty())
+                        .findAny().isPresent();
+            }
+        }
+
         return b;
     }
 
     private void addMoveEntry(Tile finTile) {
-        GameManager gameManager;
-        //      try {
-        gameManager = GameManager.getInstance();
+        GameManager gameManager = GameManager.getInstance();
         gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
-//        } catch (IOException ex) {
-//            Logger.getLogger(Piece.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+    }
+
+    public void removePieceFromArray(Tile finTile) {
+        
+        LinkedList<Piece> pieces;
+        GameManager gameManager = GameManager.getInstance();
+        if (color == 0) {
+            pieces = gameManager.getwPieceses();
+        } else {
+            pieces = gameManager.getbPieceses();
+        }
+        
+        pieces.remove(finTile.getCurrentPiece());
+
     }
 
     public boolean move(Tile finTile) {
 
-        if (!finTile.getIsEmpty()) {
+        if (!finTile.getIsEmpty() && this.color != finTile.getCurrentPiece().color) {
+            removePieceFromArray(finTile);
             finTile.removePiece();
+         
+            currentTile.removePiece();
             finTile.setCurrentPiece(this);
+            this.currentTile = finTile;
             addMoveEntry(finTile);
+          
             return true;
         }
 
+        currentTile.removePiece();
         finTile.setCurrentPiece(this);
+        this.currentTile = finTile;
+        finTile.setIsEmpty(false);
         addMoveEntry(finTile);
         return true;
+    }
+
+    protected boolean isTheSameColor(Tile startTile, Tile finTile) {
+        return (!finTile.getIsEmpty() && startTile.getCurrentPiece().color == finTile.getCurrentPiece().color);
     }
 
     public Tile getCurrentTile() {
@@ -143,7 +237,5 @@ public abstract class Piece {
     public BufferedImage getPieceImage() {
         return pieceImage;
     }
-    
-    
 
 }

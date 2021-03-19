@@ -1,6 +1,8 @@
 package cz.cvut.fel.pjv.chessgame;
 
+import cz.cvut.fel.pjv.start.GameManager;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Tile {
@@ -11,21 +13,31 @@ public class Tile {
     private Piece currentPiece = null;
     private boolean isEmpty = true;
     private HashMap<Integer, String> chMap = new HashMap<>();
-    
-//    public Tile(Piece currentPiece, int color, int x, int y) {
-//        this.currentPiece = this.currentPiece;
-//        this.color = color;
-//        this.x = x;
-//        this.y = y;
-//        this.isEmpty = false;
-//                
-//    }
 
     public Tile(int color, int x, int y) {
         this.color = color;
         this.x = x;
         this.y = y;
         isEmpty = true;
+    }
+
+    public boolean isOnStrike(int color) {
+        boolean b = false;
+        LinkedList<Piece> pieces;
+        GameManager gameManager = GameManager.getInstance();
+        if (color == 0) {
+            pieces = gameManager.getwPieceses();
+        } else {
+            pieces = gameManager.getbPieceses();
+        }
+
+        for (Piece p : pieces) {
+            b = p.isMoveAllowed(this);
+            if (!b) {
+                return b;
+            }
+        }
+        return b;
     }
 
     public int getColor() {
@@ -51,7 +63,7 @@ public class Tile {
     public void removePiece() {
         this.currentPiece = null;
         isEmpty = true;
-        
+
     }
 
     public void setCurrentPiece(Piece currentPiece) {
@@ -69,8 +81,12 @@ public class Tile {
         chMap.put(6, "f");
         chMap.put(7, "g");
         chMap.put(8, "h");
-           
+
         return chMap.get(x) + Integer.toString(y);
+    }
+
+    public void setIsEmpty(boolean isEmpty) {
+        this.isEmpty = isEmpty;
     }
 
 }
