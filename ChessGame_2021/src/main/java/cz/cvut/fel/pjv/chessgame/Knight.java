@@ -15,6 +15,7 @@ public class Knight extends Piece {
     public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
+        if (super.isTheSameColor(currentTile, finTile)) {return b; }
         if ( isVerticalMove(finTile) || isHorizontalMove(finTile) ) {
             b = true;
         }
@@ -35,7 +36,7 @@ public class Knight extends Piece {
 
     @Override
     public boolean move(Tile finTile) {
-        boolean b = true;
+        boolean b = super.move(finTile);
         return b;
     }
     

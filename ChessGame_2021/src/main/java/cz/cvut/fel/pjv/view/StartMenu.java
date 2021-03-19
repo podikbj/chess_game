@@ -31,6 +31,7 @@ public class StartMenu implements Runnable {
 
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startWindow.setVisible(true);
+        int a = 1;
         // 
 
     }

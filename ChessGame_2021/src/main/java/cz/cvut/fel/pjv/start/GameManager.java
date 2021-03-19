@@ -35,11 +35,13 @@ public class GameManager {
     private LinkedList<Tile> tileList = new LinkedList<Tile>();
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
-   //private Piece[] wPieceses = new Piece[8];
-    //private Piece[] bPieceses = new Piece[8];
+    private CheckMatePositionControl checkMatePositionControl;
+
+    private LinkedList<Piece> wPieceses = new LinkedList<Piece>();
+    private LinkedList<Piece> bPieceses = new LinkedList<Piece>();
+
     //private Tile[][] tileArray = new Tile[8][8];
     //private static Player activePlayer;
-
     public static GameManager getInstance() {
         if (instance == null) {
             instance = new GameManager();
@@ -47,10 +49,16 @@ public class GameManager {
         }
         return instance;
     }
-    
+
     private GameManager() {
         initializeTiles();
         initializePieces();
+        initializeCheckMatePositionControl();
+    }
+    
+    private void initializeCheckMatePositionControl() {
+       checkMatePositionControl = new CheckMatePositionControl(); 
+       
     }
 
     private Tile createTile(int color, int x, int y) {
@@ -61,7 +69,7 @@ public class GameManager {
     }
 
     private void initializeTiles() {
-       // int color = 0;
+        // int color = 0;
         for (int j = 7; j >= 0; j--) {
             for (int i = 0; i < 8; i++) {
                 if (i % 2 != 0) {
@@ -100,6 +108,17 @@ public class GameManager {
         }
     }
 
+    public void move(Piece currentPiece, Tile finTile) {
+        currentPiece.move(finTile);
+    }
+
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile) {
+        return currentPiece.isMoveAllowed(finTile);
+    }
+
+//    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
+//        return CheckMatePositionControl.isChecked(currentPiece, finTile, whiteIsActive);
+//    }
     private void setPieceOnTile(int color) {
         int x = 0;
         Piece[] tempPieceses = new Piece[8];
@@ -109,34 +128,74 @@ public class GameManager {
                 case (0):
                     tempPieceses[x] = new Rook(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (1):
                     tempPieceses[x] = new Knight(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (2):
                     tempPieceses[x] = new Bishop(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (3):
-                    tempPieceses[x] = new King(color);
-                    el.setCurrentPiece(tempPieceses[x]);
-                    break;
-                case (4):
                     tempPieceses[x] = new Queen(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
+                    break;
+                case (4):
+                    tempPieceses[x] = new King(color);
+                    el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                         bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (5):
                     tempPieceses[x] = new Bishop(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (6):
                     tempPieceses[x] = new Knight(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
                 case (7):
                     tempPieceses[x] = new Rook(color);
                     el.setCurrentPiece(tempPieceses[x]);
+                    if (color == 1) {
+                        wPieceses.add(tempPieceses[x]);
+                    } else {
+                        bPieceses.add(tempPieceses[x]);
+                    }
                     break;
             }
         }
@@ -146,7 +205,6 @@ public class GameManager {
 //        } else {
 //            bPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
 //        }
-
     }
 
     private void initializePieces() {
@@ -161,6 +219,8 @@ public class GameManager {
         tempTileList.clear();
         addTilesToList(white);
         setPieceOnTile(white);
+
+        tileList.stream().filter(p -> p.getIsEmpty() == false).forEach(p -> p.getCurrentPiece().setCurrentTile(p));
 
     }
 
@@ -187,6 +247,14 @@ public class GameManager {
     public List<String> getMoveSequence() {
         return moveSequence;
     }
+
+//    public Piece getwKing() {
+//        return wKing;
+//    }
+//
+//    public Piece getbKing() {
+//        return bKing;
+//    }
 
 //    private void createReport() throws IOException {
 //        Date dateNow = new Date();
@@ -227,10 +295,19 @@ public class GameManager {
 //        }
 //
 //    }
-
 //    public Tile[][] getTileArray() {
 //        return tileArray;
 //    }
+    public CheckMatePositionControl getCheckMatePositionControl() {
+        return checkMatePositionControl;
+    }
 
-    
+    public LinkedList<Piece> getwPieceses() {
+        return wPieceses;
+    }
+
+    public LinkedList<Piece> getbPieceses() {
+        return bPieceses;
+    }
+
 }

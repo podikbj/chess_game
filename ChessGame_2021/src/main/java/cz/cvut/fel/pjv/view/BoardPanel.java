@@ -2,6 +2,7 @@ package cz.cvut.fel.pjv.view;
 
 import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
+import cz.cvut.fel.pjv.start.CheckMatePositionControl;
 import cz.cvut.fel.pjv.start.GameManager;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -21,10 +22,13 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 //public final class BoardPanel extends JPanel {
 
     private final TileComponent[][] boardTileComponents;
-    private TileComponent tc;
+    private TileComponent currentTileComponent;
+    //private Tile currentTile;
     private Piece currentPiece;
     private GameWindow g;
     private GameManager gameManager = GameManager.getInstance();
+    private CheckMatePositionControl checkMatePositionControl;
+   
     private int xB = 0;
     private int yB = 0;
     private boolean whiteIsActive;
@@ -39,6 +43,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         this.addMouseMotionListener(this);
 
         LinkedList<Tile> tileList = gameManager.getTileList();
+        checkMatePositionControl = gameManager.getCheckMatePositionControl();
 //        int x = 0;
 //        int y = 0;
 
@@ -98,12 +103,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         xB = e.getX();
         yB = e.getY();
 
-        //TileComponent tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        // x = tc.getX() - e.getX();
-        // y = tc.getY() - e.getY();
-        Tile currentTile = tc.getCurrentTile();
+        currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
+        Tile currentTile = currentTileComponent.getCurrentTile();
         currentPiece = currentTile.getCurrentPiece();
+        //System.out.println(currentPiece);
         if (!currentTile.getIsEmpty()) {
             if (currentPiece.getColor() == 0 && whiteIsActive) {
                 return;
@@ -111,16 +114,79 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             if (currentPiece.getColor() == 1 && !whiteIsActive) {
                 return;
             }
-            tc.displayPiece = false;
+            currentTileComponent.setDisplayPiece(false);
         }
-        //updateLocation(e);
         repaint();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        TileComponent tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
+        TileComponent startTileComponent = currentTileComponent;
+        Tile startTile = startTileComponent.getCurrentTile();
+        
+        currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
+        Tile currentTile = currentTileComponent.getCurrentTile();
 
+        if (currentPiece != null) {
+            if (currentPiece.getColor() == 0 && whiteIsActive) {
+                return;
+            }
+            if (currentPiece.getColor() == 1 && !whiteIsActive) {
+                return;
+            }
+            if (checkMatePositionControl.isKingTile(currentTile, whiteIsActive)) {
+                return;
+            }
+            
+           
+
+//            List<Square> legalMoves = currPiece.getLegalMoves(this);
+//            movable = cmd.getAllowableSquares(whiteTurn);
+//            if (legalMoves.contains(sq) && movable.contains(sq)
+            if (gameManager.isMoveAllowed(currentPiece, currentTile)) {
+//                    && cmd.testMove(currPiece, sq)) {
+                currentTileComponent.setDisplayPiece(true);
+                gameManager.move(currentPiece, currentTile);
+                                
+                boolean isChecked = checkMatePositionControl.isChecked(currentPiece, startTile, whiteIsActive);
+                if (isChecked){
+                    isChecked = checkMatePositionControl.isChecked(currentPiece, currentTile, whiteIsActive);
+                    if(isChecked) {return;}
+                }
+                
+                
+                
+
+//                cmd.update();
+//
+//                if (cmd.blackCheckMated()) {
+//                    currPiece = null;
+//                    repaint();
+//                    this.removeMouseListener(this);
+//                    this.removeMouseMotionListener(this);
+//                    g.checkmateOccurred(0);
+//                } else if (cmd.whiteCheckMated()) {
+//                    currPiece = null;
+//                    repaint();
+//                    this.removeMouseListener(this);
+//                    this.removeMouseMotionListener(this);
+//                    g.checkmateOccurred(1);
+//                } else {
+//                    currPiece = null;
+//                    whiteTurn = !whiteTurn;
+//                    movable = cmd.getAllowableSquares(whiteTurn);
+//                }
+                whiteIsActive = !whiteIsActive;
+
+            } else {
+
+                startTileComponent.setDisplayPiece(true);
+                currentPiece = null;
+            }
+        }
+//        if (startTileComponent != currentTileComponent) {
+//            whiteIsActive = !whiteIsActive;
+//        }
 
         repaint();
     }

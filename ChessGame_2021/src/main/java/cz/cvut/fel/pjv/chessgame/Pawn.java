@@ -13,9 +13,10 @@ public class Pawn extends Piece {
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
-
         boolean b = false;
-
+        if (super.isTheSameColor(currentTile, finTile)) {
+            return b;
+        }
         int diffX = finTile.getX() - currentTile.getX();
         int diffY = finTile.getY() - currentTile.getY();
 

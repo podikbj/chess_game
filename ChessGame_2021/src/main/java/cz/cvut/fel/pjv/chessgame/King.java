@@ -13,8 +13,25 @@ public class King extends Piece {
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
-        // check position for another king, they can not be in adjacent tiles
+
         boolean b = false;
+        if (super.isTheSameColor(currentTile, finTile)) {
+            return b;
+        }
+        // check position for another king, they can not be in adjacent tiles
+        if (!finTile.getIsEmpty() && finTile.getCurrentPiece().toString().equals("K")) {
+            return b;
+        }
+
+        int diffX = finTile.getX() - currentTile.getX();
+        int diffY = finTile.getY() - currentTile.getY();
+
+        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
+           return b;
+        }
+        
+        if (finTile.isOnStrike(this.color)) { return b; }
+
         boolean areOccupiedTiles = true;
 
         if (isHorizontalMove(finTile)) {
@@ -34,7 +51,7 @@ public class King extends Piece {
 
     @Override
     public boolean move(Tile finTile) {
-        boolean b = true;
+        boolean b = super.move(finTile);
         wasMoved = true;
         return b;
     }
