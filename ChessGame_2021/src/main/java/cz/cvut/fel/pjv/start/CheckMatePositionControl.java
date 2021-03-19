@@ -6,8 +6,11 @@ import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import java.util.Comparator;
 import java.util.LinkedList;
+<<<<<<< HEAD
 import java.util.List;
 import java.util.stream.Collectors;
+=======
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
 import static java.util.stream.Collectors.toList;
 
 public class CheckMatePositionControl {
@@ -18,6 +21,7 @@ public class CheckMatePositionControl {
     private Piece wKing;
     private Piece bKing;
 
+<<<<<<< HEAD
     private Piece attaker = null;
 
     public CheckMatePositionControl() {
@@ -109,13 +113,42 @@ public class CheckMatePositionControl {
             if (whiteIsOnChech) whiteIsOnChech = !whiteIsOnChech;
         }
         return doesMoveBlockCheck;
+=======
+    public CheckMatePositionControl() {
+    }
+
+    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
+
+        boolean isChecked = false;
+        //GameManager gameManager = GameManager.getInstance();
+
+        Piece king = (whiteIsActive == true) ? wKing : bKing;
+        Tile currentKingPosition = king.getCurrentTile();
+        if (currentPiece.isMoveAllowed(currentKingPosition)) {
+            isChecked = true;
+            if (whiteIsActive) {
+                whiteIsOnChech = true;
+            } else {
+                blackIsOnCheck = true;
+            }
+            System.out.println("king " + king.getColor() + " isChecked");
+        }
+
+        return isChecked;
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
     }
 
     public boolean isKingTile(Tile finTile, boolean whiteIsActive) {
 
         boolean isKingTile = false;
+<<<<<<< HEAD
 
         Tile currentKingPosition = getCurrentKingPosition(!whiteIsActive);
+=======
+        //GameManager gameManager = GameManager.getInstance();
+        Piece king = (whiteIsActive == true) ? bKing : wKing;
+        Tile currentKingPosition = king.getCurrentTile();
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
         if (currentKingPosition == finTile) {
             isKingTile = true;
         }
@@ -123,6 +156,7 @@ public class CheckMatePositionControl {
 
     }
 
+<<<<<<< HEAD
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
         boolean isKingTile = isKingTile(finTile, whiteIsActive);
         boolean doesMoveBlockCheck = true;
@@ -139,6 +173,10 @@ public class CheckMatePositionControl {
     }
 
     public void setwKing() {
+=======
+
+    public void setwKing(Piece wKing) {
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
         GameManager gameManager = GameManager.getInstance();
         LinkedList<Piece> wPieceses = gameManager.getwPieceses();
 
@@ -149,7 +187,11 @@ public class CheckMatePositionControl {
 
     }
 
+<<<<<<< HEAD
     public void setbKing() {
+=======
+    public void setbKing(Piece bKing) {
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
         GameManager gameManager = GameManager.getInstance();
 
         LinkedList<Piece> bPieceses = gameManager.getbPieceses();

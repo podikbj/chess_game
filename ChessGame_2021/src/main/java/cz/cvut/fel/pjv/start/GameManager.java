@@ -53,10 +53,17 @@ public class GameManager {
     private GameManager() {
         initializeTiles();
         initializePieces();
+<<<<<<< HEAD
         //initializeCheckMatePositionControl();
     }
     
     public void initializeCheckMatePositionControl() {
+=======
+        initializeCheckMatePositionControl();
+    }
+    
+    private void initializeCheckMatePositionControl() {
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
        checkMatePositionControl = new CheckMatePositionControl(); 
        
     }
@@ -112,8 +119,13 @@ public class GameManager {
         currentPiece.move(finTile);
     }
 
+<<<<<<< HEAD
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
         return currentPiece.isMoveAllowed(finTile) && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, whiteIsActive);
+=======
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile) {
+        return currentPiece.isMoveAllowed(finTile);
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
     }
 
 //    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
@@ -247,6 +259,14 @@ public class GameManager {
     public List<String> getMoveSequence() {
         return moveSequence;
     }
+
+//    public Piece getwKing() {
+//        return wKing;
+//    }
+//
+//    public Piece getbKing() {
+//        return bKing;
+//    }
 
 //    private void createReport() throws IOException {
 //        Date dateNow = new Date();
