@@ -31,11 +31,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private GameWindow gameWindow;
     private GameManager gameManager = GameManager.getInstance();
     private CheckMatePositionControl checkMatePositionControl;
-<<<<<<< HEAD
 
-=======
-   
->>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
     private int xB = 0;
     private int yB = 0;
     private boolean whiteIsActive;
@@ -50,14 +46,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         this.addMouseMotionListener(this);
 
         LinkedList<Tile> tileList = gameManager.getTileList();
-<<<<<<< HEAD
+
         gameManager.initializeCheckMatePositionControl();
         checkMatePositionControl = gameManager.getCheckMatePositionControl();
-=======
+
         checkMatePositionControl = gameManager.getCheckMatePositionControl();
 //        int x = 0;
 //        int y = 0;
->>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
+
 
         for (Tile t : tileList) {
             xB = t.getX();
@@ -127,7 +123,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     public void mouseReleased(MouseEvent e) {
         TileComponent startTileComponent = currentTileComponent;
         Tile startTile = startTileComponent.getCurrentTile();
-<<<<<<< HEAD
 
         currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
         Tile currentTile = currentTileComponent.getCurrentTile();
@@ -182,80 +177,8 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 }
 
                 whiteIsActive = !whiteIsActive;
-
-=======
         
-        currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        Tile currentTile = currentTileComponent.getCurrentTile();
-
-        if (currentPiece != null) {
-            if (currentPiece.getColor() == 0 && whiteIsActive) {
-                return;
-            }
-            if (currentPiece.getColor() == 1 && !whiteIsActive) {
-                return;
-            }
-            if (checkMatePositionControl.isKingTile(currentTile, whiteIsActive)) {
-                return;
-            }
-            
-           
-
-//            List<Square> legalMoves = currPiece.getLegalMoves(this);
-//            movable = cmd.getAllowableSquares(whiteTurn);
-//            if (legalMoves.contains(sq) && movable.contains(sq)
-            if (gameManager.isMoveAllowed(currentPiece, currentTile)) {
-//                    && cmd.testMove(currPiece, sq)) {
-                currentTileComponent.setDisplayPiece(true);
-                gameManager.move(currentPiece, currentTile);
-                                
-                boolean isChecked = checkMatePositionControl.isChecked(currentPiece, startTile, whiteIsActive);
-                if (isChecked){
-                    isChecked = checkMatePositionControl.isChecked(currentPiece, currentTile, whiteIsActive);
-                    if(isChecked) {return;}
-                }
-                
-                
-                
-
-//                cmd.update();
-//
-//                if (cmd.blackCheckMated()) {
-//                    currPiece = null;
-//                    repaint();
-//                    this.removeMouseListener(this);
-//                    this.removeMouseMotionListener(this);
-//                    g.checkmateOccurred(0);
-//                } else if (cmd.whiteCheckMated()) {
-//                    currPiece = null;
-//                    repaint();
-//                    this.removeMouseListener(this);
-//                    this.removeMouseMotionListener(this);
-//                    g.checkmateOccurred(1);
-//                } else {
-//                    currPiece = null;
-//                    whiteTurn = !whiteTurn;
-//                    movable = cmd.getAllowableSquares(whiteTurn);
-//                }
-                whiteIsActive = !whiteIsActive;
-
->>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
-            } else {
-
-                startTileComponent.setDisplayPiece(true);
-                currentPiece = null;
-<<<<<<< HEAD
-
-            }
-        }
-=======
-            }
-        }
-//        if (startTileComponent != currentTileComponent) {
-//            whiteIsActive = !whiteIsActive;
-//        }
->>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
-
+ 
         repaint();
 
     }
