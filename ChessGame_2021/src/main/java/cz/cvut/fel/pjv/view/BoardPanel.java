@@ -46,14 +46,8 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         this.addMouseMotionListener(this);
 
         LinkedList<Tile> tileList = gameManager.getTileList();
-
         gameManager.initializeCheckMatePositionControl();
         checkMatePositionControl = gameManager.getCheckMatePositionControl();
-
-        checkMatePositionControl = gameManager.getCheckMatePositionControl();
-//        int x = 0;
-//        int y = 0;
-
 
         for (Tile t : tileList) {
             xB = t.getX();
@@ -177,8 +171,15 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 }
 
                 whiteIsActive = !whiteIsActive;
-        
- 
+
+            } else {
+
+                startTileComponent.setDisplayPiece(true);
+                currentPiece = null;
+
+            }
+        }
+
         repaint();
 
     }
