@@ -5,8 +5,6 @@ import java.util.List;
 
 public class Pawn extends Piece {
 
-    private boolean wasMoved = false;
-
     public Pawn(int color) {
         super(color, "src/main/resources/bpawn.png", "src/main/resources/wpawn.png");
     }

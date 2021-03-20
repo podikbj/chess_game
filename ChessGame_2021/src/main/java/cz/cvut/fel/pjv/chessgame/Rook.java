@@ -5,8 +5,6 @@ import java.util.List;
 
 public class Rook extends Piece {
 
-    private boolean wasMoved = false;
-
     public Rook(int color) {
         super(color, "src/main/resources/brook.png", "src/main/resources/wrook.png");
     }
@@ -40,5 +38,9 @@ public class Rook extends Piece {
     public String toString() {
         return "R";
     }
+
+
+    
+    
 
 }

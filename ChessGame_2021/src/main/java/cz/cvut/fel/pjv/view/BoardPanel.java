@@ -15,7 +15,10 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.LinkedList;
 import java.util.List;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
@@ -25,7 +28,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private TileComponent currentTileComponent;
     //private Tile currentTile;
     private Piece currentPiece;
-    private GameWindow g;
+    private GameWindow gameWindow;
     private GameManager gameManager = GameManager.getInstance();
     private CheckMatePositionControl checkMatePositionControl;
 
@@ -126,13 +129,46 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 return;
             }
 
+            int castling = -1;
+            if (currentPiece.toString().equals("R") && !currentPiece.isWasMoved()) {
+                castling = JOptionPane.showConfirmDialog(
+                        null,
+                        "Do you want to provide castling?", "Confirmation castling",
+                        JOptionPane.DEFAULT_OPTION);
 
-            if (gameManager.isMoveAllowed(currentPiece, currentTile, whiteIsActive)) {
+            }
+
+            if (gameManager.isMoveAllowed(currentPiece, currentTile, startTile, whiteIsActive, castling)) {
 
                 currentTileComponent.setDisplayPiece(true);
+
                 gameManager.move(currentPiece, currentTile);
 
                 checkMatePositionControl.isItCheck(currentPiece, whiteIsActive);
+
+                //if a pawn get oppisite border you are allowed to convert it to any piece exept king
+                if (currentPiece.toString().equals("P")) {
+                    if ((currentPiece.getColor() == 0 && currentTile.getY() == 0)
+                            || (currentPiece.getColor() == 1 && currentTile.getY() == 7)) {
+                        String[] options = {"Queen", "Rook", "Bishop", "Knight", "Cancel"};
+                        int x = JOptionPane.showOptionDialog(
+                                null,
+                                "Click a button to convert this pawn to another piece", "Click a button",
+                                JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+                        gameManager.changePawn(currentPiece, currentTile, whiteIsActive, x);
+
+                    }
+
+                }
+
+                if (castling == JOptionPane.YES_OPTION) {
+                    Tile finishKingTile = checkMatePositionControl.doCastling(currentTile, whiteIsActive);
+                    TileComponent finishKingTileComponent = boardTileComponents[finishKingTile.getX()][finishKingTile.getY()];
+                    finishKingTileComponent.setDisplayPiece(true);
+                    finishKingTileComponent.repaint();
+           
+                }
 
                 whiteIsActive = !whiteIsActive;
 

@@ -5,8 +5,6 @@ import java.util.List;
 
 public class King extends Piece {
 
-    private boolean wasMoved = false;
-
     public King(int color) {
         super(color, "src/main/resources/bking.png", "src/main/resources/wking.png");
     }
@@ -18,7 +16,7 @@ public class King extends Piece {
         if (super.isTheSameColor(currentTile, finTile)) {
             return b;
         }
-        // check position for another king, they can not be in adjacent tiles
+         //check position for another king, they can not be in adjacent tiles
         if (!finTile.getIsEmpty() && finTile.getCurrentPiece().toString().equals("K")) {
             return b;
         }
@@ -27,10 +25,12 @@ public class King extends Piece {
         int diffY = finTile.getY() - currentTile.getY();
 
         if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
-           return b;
+            return b;
         }
-        
-        if (finTile.isOnStrike(this.color)) { return b; }
+
+        if (finTile.isOnStrike(this.color)) {
+            return b;
+        }
 
         boolean areOccupiedTiles = true;
 

@@ -105,8 +105,12 @@ public class CheckMatePositionControl {
 
         if (tempList != null && tempList.contains(finTile)) {
             doesMoveBlockCheck = true;
-            if (blackIsOnCheck) blackIsOnCheck = !blackIsOnCheck;
-            if (whiteIsOnChech) whiteIsOnChech = !whiteIsOnChech;
+            if (blackIsOnCheck) {
+                blackIsOnCheck = !blackIsOnCheck;
+            }
+            if (whiteIsOnChech) {
+                whiteIsOnChech = !whiteIsOnChech;
+            }
         }
         return doesMoveBlockCheck;
     }
@@ -123,13 +127,38 @@ public class CheckMatePositionControl {
 
     }
 
-    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive, int castling) {
+        //it's not allowed to capture a king
         boolean isKingTile = isKingTile(finTile, whiteIsActive);
+        //it's not allowed to make some moves being under check 
         boolean doesMoveBlockCheck = true;
+        boolean canEscapeCheck = true;
         if (isChecked(whiteIsActive)) {
-            doesMoveBlockCheck = doesMoveBlockCheck(currentPiece, finTile, whiteIsActive);
+
+            if (currentPiece.toString().equals("K")) {
+                canEscapeCheck = canEscapeCheck(whiteIsActive);
+            } else {
+                doesMoveBlockCheck = doesMoveBlockCheck(currentPiece, finTile, whiteIsActive);
+            }
+
         }
-        return !isKingTile && doesMoveBlockCheck;
+        //it's not allowed to make some moves causing to check
+        boolean doesMoveCauseCheck = false;
+        doesMoveCauseCheck = doesMoveCauseCheck(currentPiece, finTile, startTile, whiteIsActive);
+        //it's not allowed castling being under check and if piece was moved
+        boolean castlingIsAllowed = true;
+        if (castling == 1) {
+            castlingIsAllowed = castlingIsAllowed(finTile, whiteIsActive);
+        }
+        // kings are not allowed to occupy adjacent tiles
+//        boolean kingsAreOccupiedAdjacentTiles = false;
+//        if (currentPiece.toString().equals("K")) {
+//            kingsAreOccupiedAdjacentTiles = kingsAreOccupiedAdjacentTiles(finTile, whiteIsActive);
+//        }
+
+        return !isKingTile && doesMoveBlockCheck && !doesMoveCauseCheck
+                && canEscapeCheck
+                && castlingIsAllowed;
     }
 
     private Tile getCurrentKingPosition(boolean whiteIsActive) {
@@ -160,4 +189,124 @@ public class CheckMatePositionControl {
                 .findAny().get();
 
     }
+
+    private List<Tile> getEmptyTilesAroundKing(boolean whiteIsActive) {
+        Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
+        GameManager gameManager = GameManager.getInstance();
+        LinkedList<Tile> tempList = gameManager.getTileList();
+
+        List<Tile> newList = tempList.stream()
+                .filter(p -> Math.abs(p.getX() - currentKingPosition.getX()) == 1)
+                .filter(p -> Math.abs(p.getY() - currentKingPosition.getY()) == 1)
+                .filter(p -> p.getIsEmpty())
+                .collect(Collectors.toList());
+
+        return newList;
+    }
+
+    private boolean canEscapeCheck(boolean whiteIsActive) {
+        boolean b = true;
+        Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
+        List<Tile> tempList = getEmptyTilesAroundKing(whiteIsActive);
+        GameManager gameManager = GameManager.getInstance();
+        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getbPieceses() : gameManager.getwPieceses();
+        for (Piece p : pieceses) {
+            for (Tile t : tempList) {
+                if (p.isMoveAllowed(t)) {
+                    b = false;
+                    break;
+                }
+            }
+        }
+        return b;
+    }
+
+    private boolean canBlockCheck() {
+        boolean b = true;
+        return b;
+    }
+
+    private boolean doesMoveCauseCheck(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive) {
+        boolean b = false;
+        Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
+        GameManager gameManager = GameManager.getInstance();
+        if (currentPiece == startTile.getCurrentPiece()) {
+            startTile.removePiece();
+            finTile.setCurrentPiece(currentPiece);
+        }
+
+        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getbPieceses() : gameManager.getwPieceses();
+        for (Piece p : pieceses) {
+            if (p.isMoveAllowed(currentKingPosition)) {
+                b = true;
+                break;
+            }
+        }
+        startTile.setCurrentPiece(currentPiece);
+        finTile.removePiece();
+
+        return b;
+    }
+
+    private boolean kingsAreOccupiedAdjacentTiles(Tile finTile, boolean whiteIsActive) {
+        boolean b = false;
+        Tile currentKingPosition = getCurrentKingPosition(!whiteIsActive);
+        List<Tile> emptyTilesAroundKing = getEmptyTilesAroundKing(!whiteIsActive);
+        return emptyTilesAroundKing.contains(finTile);
+
+    }
+
+    public boolean castlingIsAllowed(Tile finTile, boolean whiteIsActive) {
+        boolean b = true;
+        if (isChecked(whiteIsActive)) {
+            return b = false;
+        }
+        Piece king = (whiteIsActive == true) ? wKing : bKing;
+        if (king.isWasMoved()) {
+            return b = false;
+        }
+
+        if (finTile.getX() != 5 || finTile.getX() != 3) {
+            return b = false;
+        }
+
+        return b;
+
+    }
+
+    public Tile doCastling(Tile finTile, boolean whiteIsActive) {
+
+        Piece king = (whiteIsActive == true) ? wKing : bKing;
+        Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
+        currentKingPosition.removePiece();
+        Tile finKingTile = null;
+
+        GameManager gameManager = GameManager.getInstance();
+        LinkedList<Tile> tempList = gameManager.getTileList();
+
+        if (finTile.getX() == 5 && whiteIsActive) {
+            finKingTile = tempList.stream()
+                    .filter(p -> p.getX() == 6 && p.getY() == 0).findAny().get();
+        }
+        if (finTile.getX() == 3 && whiteIsActive) {
+            finKingTile = tempList.stream()
+                    .filter(p -> p.getX() == 2 && p.getY() == 0).findAny().get();
+        }
+        if (finTile.getX() == 3 && !whiteIsActive) {
+            finKingTile = tempList.stream()
+                    .filter(p -> p.getX() == 2 && p.getY() == 7).findAny().get();
+        }
+        if (finTile.getX() == 5 && !whiteIsActive) {
+            finKingTile = tempList.stream()
+                    .filter(p -> p.getX() == 6 && p.getY() == 7).findAny().get();
+        }
+
+        if (finKingTile != null) {
+            king.move(finKingTile);
+        }
+
+        return finKingTile;
+
+    }
+
 }

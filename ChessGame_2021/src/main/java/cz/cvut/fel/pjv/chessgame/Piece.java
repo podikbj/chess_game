@@ -18,6 +18,7 @@ public abstract class Piece {
     protected Tile currentTile;
     protected String imageFilePath;
     private BufferedImage pieceImage;
+    protected boolean wasMoved = false;
     //private GameManager gameManager = GameManager.getInstance();
     //private GameManager gameManager;
 
@@ -41,11 +42,11 @@ public abstract class Piece {
     }
 
     public boolean isVerticalMove(Tile finTile) { // x const
-        return (finTile.getX() == currentTile.getX() && finTile.getY() != currentTile.getY()) ;
+        return (finTile.getX() == currentTile.getX() && finTile.getY() != currentTile.getY());
     }
 
     public boolean isHorizontalMove(Tile finTile) { // x const
-   
+
         return (finTile.getY() == currentTile.getY() && finTile.getX() != currentTile.getX());
     }
 
@@ -55,22 +56,22 @@ public abstract class Piece {
         GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
-//                .filter(p -> p.getX() == currentTile.getX())
-//                .filter(p -> p.getY() > currentTile.getY())
-//                .filter(p -> p.getY() < finTile.getY())
-                    .filter(p -> p.getY() == currentTile.getY())
-                    .filter((p)
-                            -> {
-                        boolean x = false;
-                        if (currentTile.getX() > finTile.getX()) {
-                            x = (p.getX() > finTile.getX() && p.getX() < currentTile.getX());
-                        }
-                        if (currentTile.getX() < finTile.getX()) {
-                            x = (p.getX() < finTile.getX() && p.getX() > currentTile.getX());
-                        }
-                        return x;
+                //                .filter(p -> p.getX() == currentTile.getX())
+                //                .filter(p -> p.getY() > currentTile.getY())
+                //                .filter(p -> p.getY() < finTile.getY())
+                .filter(p -> p.getY() == currentTile.getY())
+                .filter((p)
+                        -> {
+                    boolean x = false;
+                    if (currentTile.getX() > finTile.getX()) {
+                        x = (p.getX() > finTile.getX() && p.getX() < currentTile.getX());
                     }
-                    )
+                    if (currentTile.getX() < finTile.getX()) {
+                        x = (p.getX() < finTile.getX() && p.getX() > currentTile.getX());
+                    }
+                    return x;
+                }
+                )
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
 
@@ -83,23 +84,23 @@ public abstract class Piece {
         GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
-//                .filter(p -> p.getY() == currentTile.getY())
+                //                .filter(p -> p.getY() == currentTile.getY())
                 //                .filter(p -> p.getX() > currentTile.getX())
                 //                .filter(p -> p.getX() < finTile.getX())
-                
-                    .filter(p -> p.getX() == currentTile.getX())
-                    .filter((p)
-                            -> {
-                        boolean y = false;
-                        if (currentTile.getY() > finTile.getY()) {
-                            y = (p.getY() > finTile.getY() && p.getY() < currentTile.getY());
-                        }
-                        if (currentTile.getY() < finTile.getY()) {
-                            y = (p.getY() < finTile.getY() && p.getY() > currentTile.getY());
-                        }
-                        return y;
+
+                .filter(p -> p.getX() == currentTile.getX())
+                .filter((p)
+                        -> {
+                    boolean y = false;
+                    if (currentTile.getY() > finTile.getY()) {
+                        y = (p.getY() > finTile.getY() && p.getY() < currentTile.getY());
                     }
-                    )
+                    if (currentTile.getY() < finTile.getY()) {
+                        y = (p.getY() < finTile.getY() && p.getY() > currentTile.getY());
+                    }
+                    return y;
+                }
+                )
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
         return b;
@@ -110,62 +111,108 @@ public abstract class Piece {
         boolean b = false;
         GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
-        if (finTile.getX() > currentTile.getX()) {
-            if (finTile.getY() > currentTile.getY()) {
-                b = tileList.stream()
-                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
-                        .filter(p -> p.getX() > currentTile.getX())
-                        .filter(p -> p.getY() > currentTile.getY())
-                        .filter(p -> p.getX() < finTile.getX())
-                        .filter(p -> p.getY() < finTile.getY())
-                        .filter(p -> !p.getIsEmpty())
-                        .findAny().isPresent();
-
-//                List<Tile> newList = tileList.stream()
+//        if (finTile.getX() > currentTile.getX()) {
+//            if (finTile.getY() > currentTile.getY()) {
+//                b = tileList.stream()
 //                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
 //                        .filter(p -> p.getX() > currentTile.getX())
 //                        .filter(p -> p.getY() > currentTile.getY())
-//                        .filter(p -> p.getX() <= finTile.getX())
-//                        .filter(p -> p.getY() <= finTile.getY())
-//                        .collect(Collectors.toList());
-//                for (Tile t : newList) {
-//                    System.out.println("x: " + t.getX() + ", y: " + t.getY());
-//                }
-            }
-            if (finTile.getY() < currentTile.getY()) {
-                b = tileList.stream()
-                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
-                        .filter(p -> p.getX() > currentTile.getX())
-                        .filter(p -> p.getY() < currentTile.getY())
-                        .filter(p -> p.getX() < finTile.getX())
-                        .filter(p -> p.getY() > finTile.getY())
-                        .filter(p -> !p.getIsEmpty())
-                        .findAny().isPresent();
-            }
-        }
-        if (finTile.getX() < currentTile.getX()) {
-            if (finTile.getY() > currentTile.getY()) {
-                b = tileList.stream()
-                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
-                        .filter(p -> p.getX() < currentTile.getX())
-                        .filter(p -> p.getY() > currentTile.getY())
-                        .filter(p -> p.getX() > finTile.getX())
-                        .filter(p -> p.getY() < finTile.getY())
-                        .filter(p -> !p.getIsEmpty())
-                        .findAny().isPresent();
-            }
-            if (finTile.getY() < currentTile.getY()) {
-                b = tileList.stream()
-                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
-                        .filter(p -> p.getX() < currentTile.getX())
-                        .filter(p -> p.getY() < currentTile.getY())
-                        .filter(p -> p.getX() > finTile.getX())
-                        .filter(p -> p.getY() > finTile.getY())
-                        .filter(p -> !p.getIsEmpty())
-                        .findAny().isPresent();
-            }
-        }
+//                        .filter(p -> p.getX() < finTile.getX())
+//                        .filter(p -> p.getY() < finTile.getY())
+//                        .filter(p -> !p.getIsEmpty())
+//                        .findAny().isPresent();
+//
+////                List<Tile> newList = tileList.stream()
+////                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+////                        .filter(p -> p.getX() > currentTile.getX())
+////                        .filter(p -> p.getY() > currentTile.getY())
+////                        .filter(p -> p.getX() <= finTile.getX())
+////                        .filter(p -> p.getY() <= finTile.getY())
+////                        .collect(Collectors.toList());
+////                for (Tile t : newList) {
+////                    System.out.println("x: " + t.getX() + ", y: " + t.getY());
+////                }
+//            }
+//            if (finTile.getY() < currentTile.getY()) {
+//                b = tileList.stream()
+//                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+//                        .filter(p -> p.getX() > currentTile.getX())
+//                        .filter(p -> p.getY() < currentTile.getY())
+//                        .filter(p -> p.getX() < finTile.getX())
+//                        .filter(p -> p.getY() > finTile.getY())
+//                        .filter(p -> !p.getIsEmpty())
+//                        .findAny().isPresent();
+//            }
+//        }
+//        if (finTile.getX() < currentTile.getX()) {
+//            if (finTile.getY() > currentTile.getY()) {
+//                b = tileList.stream()
+//                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+//                        .filter(p -> p.getX() < currentTile.getX())
+//                        .filter(p -> p.getY() > currentTile.getY())
+//                        .filter(p -> p.getX() > finTile.getX())
+//                        .filter(p -> p.getY() < finTile.getY())
+//                        .filter(p -> !p.getIsEmpty())
+//                        .findAny().isPresent();
+//            }
+//            if (finTile.getY() < currentTile.getY()) {
+//                b = tileList.stream()
+//                        .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+//                        .filter(p -> p.getX() < currentTile.getX())
+//                        .filter(p -> p.getY() < currentTile.getY())
+//                        .filter(p -> p.getX() > finTile.getX())
+//                        .filter(p -> p.getY() > finTile.getY())
+//                        .filter(p -> !p.getIsEmpty())
+//                        .findAny().isPresent();
+//            }
+//        }
 
+        b = tileList.stream()
+                .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
+                .filter((p)
+                        -> {
+                    boolean xy = false;
+                    if (finTile.getX() > currentTile.getX() && finTile.getY() > currentTile.getY()) {
+
+                        xy = (p.getX() > currentTile.getX()
+                                && p.getY() > currentTile.getY()
+                                && p.getX() < finTile.getX()
+                                && p.getY() < finTile.getY());
+                    }
+
+                    if (finTile.getX() > currentTile.getX() && finTile.getY() < currentTile.getY()) {
+
+                        xy = (p.getX() > currentTile.getX()
+                                && p.getY() < currentTile.getY()
+                                && p.getX() < finTile.getX()
+                                && p.getY() > finTile.getY());
+
+                    }
+
+                    if (finTile.getX() < currentTile.getX() && finTile.getY() > currentTile.getY()) {
+
+                        xy = (p.getX() < currentTile.getX()
+                                && p.getY() < currentTile.getY()
+                                && p.getX() > finTile.getX()
+                                && p.getY() > finTile.getY());
+
+                    }
+
+                    if (finTile.getX() < currentTile.getX() && finTile.getY() < currentTile.getY()) {
+
+                        xy = (p.getX() < currentTile.getX()
+                                && p.getY() > currentTile.getY()
+                                && p.getX() > finTile.getX()
+                                && p.getY() < finTile.getY());
+
+                    }
+
+                    return xy;
+                }
+                )
+                .
+                filter(p -> !p.getIsEmpty())
+                .findAny().isPresent();
         return b;
     }
 
@@ -175,7 +222,7 @@ public abstract class Piece {
     }
 
     public void removePieceFromArray(Tile finTile) {
-        
+
         LinkedList<Piece> pieces;
         GameManager gameManager = GameManager.getInstance();
         if (color == 0) {
@@ -183,7 +230,7 @@ public abstract class Piece {
         } else {
             pieces = gameManager.getbPieceses();
         }
-        
+
         pieces.remove(finTile.getCurrentPiece());
 
     }
@@ -193,12 +240,12 @@ public abstract class Piece {
         if (!finTile.getIsEmpty() && this.color != finTile.getCurrentPiece().color) {
             removePieceFromArray(finTile);
             finTile.removePiece();
-         
+
             currentTile.removePiece();
             finTile.setCurrentPiece(this);
             this.currentTile = finTile;
             addMoveEntry(finTile);
-          
+
             return true;
         }
 
@@ -236,6 +283,10 @@ public abstract class Piece {
 
     public BufferedImage getPieceImage() {
         return pieceImage;
+    }
+
+    public boolean isWasMoved() {
+        return wasMoved;
     }
 
 }

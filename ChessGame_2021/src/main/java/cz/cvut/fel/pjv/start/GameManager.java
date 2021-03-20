@@ -55,10 +55,10 @@ public class GameManager {
         initializePieces();
         //initializeCheckMatePositionControl();
     }
-    
+
     public void initializeCheckMatePositionControl() {
-       checkMatePositionControl = new CheckMatePositionControl(); 
-       
+        checkMatePositionControl = new CheckMatePositionControl();
+
     }
 
     private Tile createTile(int color, int x, int y) {
@@ -112,8 +112,9 @@ public class GameManager {
         currentPiece.move(finTile);
     }
 
-    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
-        return currentPiece.isMoveAllowed(finTile) && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, whiteIsActive);
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive, int castling) {
+        return currentPiece.isMoveAllowed(finTile)
+                && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, castling);
     }
 
 //    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
@@ -167,7 +168,7 @@ public class GameManager {
                     if (color == 1) {
                         wPieceses.add(tempPieceses[x]);
                     } else {
-                         bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[x]);
                     }
                     break;
                 case (5):
@@ -247,6 +248,31 @@ public class GameManager {
     public List<String> getMoveSequence() {
         return moveSequence;
     }
+
+    public void changePawn(Piece currentPiece, Tile currentTile, boolean whiteIsActive, int x) { 
+        int color = (whiteIsActive == true) ? 1 : 0;
+        Piece newPiece = null;
+        switch (x) {
+            case 0:
+                newPiece = new Queen(color);
+                break;
+            case 1:
+                newPiece = new Rook(color);
+                break;
+            case 2:
+                newPiece = new Bishop(color);
+                break;
+            case 3:
+                newPiece = new Knight(color);
+                break;
+            case 4:
+ 
+                break;
+        }
+        currentTile.setCurrentPiece(newPiece);
+    }
+    
+
 
 //    private void createReport() throws IOException {
 //        Date dateNow = new Date();
