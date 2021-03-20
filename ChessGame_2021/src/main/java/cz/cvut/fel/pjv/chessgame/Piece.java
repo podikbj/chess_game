@@ -56,6 +56,7 @@ public abstract class Piece {
         GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
+<<<<<<< HEAD
                 //                .filter(p -> p.getX() == currentTile.getX())
                 //                .filter(p -> p.getY() > currentTile.getY())
                 //                .filter(p -> p.getY() < finTile.getY())
@@ -72,6 +73,30 @@ public abstract class Piece {
                     return x;
                 }
                 )
+=======
+<<<<<<< HEAD
+//                .filter(p -> p.getX() == currentTile.getX())
+//                .filter(p -> p.getY() > currentTile.getY())
+//                .filter(p -> p.getY() < finTile.getY())
+                    .filter(p -> p.getY() == currentTile.getY())
+                    .filter((p)
+                            -> {
+                        boolean x = false;
+                        if (currentTile.getX() > finTile.getX()) {
+                            x = (p.getX() > finTile.getX() && p.getX() < currentTile.getX());
+                        }
+                        if (currentTile.getX() < finTile.getX()) {
+                            x = (p.getX() < finTile.getX() && p.getX() > currentTile.getX());
+                        }
+                        return x;
+                    }
+                    )
+=======
+                .filter(p -> p.getX() == currentTile.getX())
+                .filter(p -> p.getY() > currentTile.getY())
+                .filter(p -> p.getY() < finTile.getY())
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
 
@@ -84,7 +109,12 @@ public abstract class Piece {
         GameManager gameManager = GameManager.getInstance();
         List<Tile> tileList = gameManager.getTileList();
         b = tileList.stream()
+<<<<<<< HEAD
                 //                .filter(p -> p.getY() == currentTile.getY())
+=======
+<<<<<<< HEAD
+//                .filter(p -> p.getY() == currentTile.getY())
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
                 //                .filter(p -> p.getX() > currentTile.getX())
                 //                .filter(p -> p.getX() < finTile.getX())
 
@@ -95,12 +125,21 @@ public abstract class Piece {
                     if (currentTile.getY() > finTile.getY()) {
                         y = (p.getY() > finTile.getY() && p.getY() < currentTile.getY());
                     }
+<<<<<<< HEAD
                     if (currentTile.getY() < finTile.getY()) {
                         y = (p.getY() < finTile.getY() && p.getY() > currentTile.getY());
                     }
                     return y;
                 }
                 )
+=======
+                    )
+=======
+                .filter(p -> p.getY() == currentTile.getY())
+                .filter(p -> p.getX() > currentTile.getX())
+                .filter(p -> p.getX() < finTile.getX())
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
                 .filter(p -> !p.getIsEmpty())
                 .findAny().isPresent();
         return b;

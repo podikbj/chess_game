@@ -53,12 +53,24 @@ public class GameManager {
     private GameManager() {
         initializeTiles();
         initializePieces();
+<<<<<<< HEAD
         //initializeCheckMatePositionControl();
     }
 
     public void initializeCheckMatePositionControl() {
+<<<<<<< HEAD
         checkMatePositionControl = new CheckMatePositionControl();
 
+=======
+=======
+        initializeCheckMatePositionControl();
+    }
+    
+    private void initializeCheckMatePositionControl() {
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
+       checkMatePositionControl = new CheckMatePositionControl(); 
+       
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
     }
 
     private Tile createTile(int color, int x, int y) {
@@ -112,9 +124,19 @@ public class GameManager {
         currentPiece.move(finTile);
     }
 
+<<<<<<< HEAD
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive, int castling) {
         return currentPiece.isMoveAllowed(finTile)
                 && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, castling);
+=======
+<<<<<<< HEAD
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
+        return currentPiece.isMoveAllowed(finTile) && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, whiteIsActive);
+=======
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile) {
+        return currentPiece.isMoveAllowed(finTile);
+>>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
     }
 
 //    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
@@ -249,6 +271,7 @@ public class GameManager {
         return moveSequence;
     }
 
+<<<<<<< HEAD
     public void changePawn(Piece currentPiece, Tile currentTile, boolean whiteIsActive, int x) { 
         int color = (whiteIsActive == true) ? 1 : 0;
         Piece newPiece = null;
@@ -273,6 +296,15 @@ public class GameManager {
     }
     
 
+=======
+//    public Piece getwKing() {
+//        return wKing;
+//    }
+//
+//    public Piece getbKing() {
+//        return bKing;
+//    }
+>>>>>>> 7daedc57f25617f4a43287d75ee9d715665b29be
 
 //    private void createReport() throws IOException {
 //        Date dateNow = new Date();
