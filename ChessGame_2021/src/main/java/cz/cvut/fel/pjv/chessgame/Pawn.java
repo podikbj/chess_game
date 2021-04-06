@@ -5,15 +5,19 @@ import java.util.List;
 
 public class Pawn extends Piece {
 
-    public Pawn(int color) {
-        super(color, "src/main/resources/bpawn.png", "src/main/resources/wpawn.png");
+    public Pawn(int color, Tile tile) {
+        super(color, tile, "src/main/resources/bpawn.png", "src/main/resources/wpawn.png");
     }
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {
+        if (super.isTheSameColor(finTile)) {
             return b;
+        }
+        boolean areOccupiedTiles = true;
+        if (isVerticalMove(finTile)) {
+            areOccupiedTiles = isAnyTileIsOccupiedVerticalMove(finTile);
         }
         int diffX = finTile.getX() - currentTile.getX();
         int diffY = finTile.getY() - currentTile.getY();
@@ -25,7 +29,7 @@ public class Pawn extends Piece {
             return b;
         }
 
-        if (!wasMoved && Math.abs(diffY) < 3 && diffX == 0) {
+        if (!wasMoved && Math.abs(diffY) < 3 && diffX == 0 && !areOccupiedTiles) {
             b = true;
         }
 

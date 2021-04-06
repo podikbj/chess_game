@@ -5,14 +5,14 @@ import java.util.List;
 
 public class Rook extends Piece {
 
-    public Rook(int color) {
-        super(color, "src/main/resources/brook.png", "src/main/resources/wrook.png");
+    public Rook(int color, Tile tile) {
+        super(color, tile,"src/main/resources/brook.png", "src/main/resources/wrook.png");
     }
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {return b; }
+        if (super.isTheSameColor(finTile)) {return b; }
         boolean areOccupiedTiles = true;
 
         if (isHorizontalMove(finTile)) {

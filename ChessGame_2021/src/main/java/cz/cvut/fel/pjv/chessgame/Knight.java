@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Knight extends Piece {
 
-    public Knight(int color) {
+    public Knight(int color, Tile tile) {
 
-        super(color, "src/main/resources/bknight.png", "src/main/resources/wknight.png");
+        super(color, tile,"src/main/resources/bknight.png", "src/main/resources/wknight.png");
      
     }
 
@@ -15,7 +15,7 @@ public class Knight extends Piece {
     public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {return b; }
+        if (super.isTheSameColor(finTile)) {return b; }
         if ( isVerticalMove(finTile) || isHorizontalMove(finTile) ) {
             b = true;
         }

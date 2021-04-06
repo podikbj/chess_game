@@ -5,15 +5,15 @@ import java.util.List;
 
 public class King extends Piece {
 
-    public King(int color) {
-        super(color, "src/main/resources/bking.png", "src/main/resources/wking.png");
+    public King(int color, Tile tile) {
+        super(color, tile, "src/main/resources/bking.png", "src/main/resources/wking.png");
     }
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {
+        if (super.isTheSameColor(finTile)) {
             return b;
         }
          //check position for another king, they can not be in adjacent tiles

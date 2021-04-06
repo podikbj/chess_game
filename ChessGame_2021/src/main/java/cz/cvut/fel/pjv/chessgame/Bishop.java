@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Bishop extends Piece {
 
-    public Bishop(int color) {
-        super(color, "src/main/resources/bbishop.png" , "src/main/resources/wbishop.png");
+    public Bishop(int color, Tile tile) {
+        super(color, tile, "src/main/resources/bbishop.png" , "src/main/resources/wbishop.png");
 
     }
 
@@ -14,7 +14,7 @@ public class Bishop extends Piece {
     public boolean isMoveAllowed(Tile finTile) {
         
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {return b; }
+        if (super.isTheSameColor(finTile)) {return b; }
         if (isDiagonalMove(finTile)) {
             boolean findOccupiedTiles = isAnyTileIsOccupiedDiagonalMove(finTile);
             b = !findOccupiedTiles;

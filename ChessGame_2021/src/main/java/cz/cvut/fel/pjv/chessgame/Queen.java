@@ -5,15 +5,15 @@ import java.util.List;
 
 public class Queen extends Piece {
 
-    public Queen(int color) {
-        super(color, "src/main/resources/bqueen.png", "src/main/resources/wqueen.png");
+    public Queen(int color, Tile tile) {
+        super(color, tile, "src/main/resources/bqueen.png", "src/main/resources/wqueen.png");
     }
 
     @Override
     public boolean isMoveAllowed(Tile finTile) {
 
         boolean b = false;
-        if (super.isTheSameColor(currentTile, finTile)) {return b; }
+        if (super.isTheSameColor(finTile)) {return b; }
         boolean areOccupiedTiles = true;
 
         if (isHorizontalMove(finTile)) {
