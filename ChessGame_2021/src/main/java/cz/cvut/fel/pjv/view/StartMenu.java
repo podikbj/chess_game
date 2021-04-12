@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 
 public class StartMenu implements Runnable {
 
+    public static boolean isManual = false;
+
     public void run() {
         final JFrame startWindow = new JFrame("Chess");
 
@@ -20,7 +22,8 @@ public class StartMenu implements Runnable {
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                new GameWindow();
+                //new GameWindow();
+                new GameForm();
                 startWindow.dispose();
             }
         });
@@ -30,14 +33,7 @@ public class StartMenu implements Runnable {
 
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startWindow.setVisible(true);
-<<<<<<< HEAD
-
-=======
-        int a = 1;
-        // 
->>>>>>> 12bb173c7ad0468d60ebd2210041c3a060a0878f
 
     }
-
 
 }

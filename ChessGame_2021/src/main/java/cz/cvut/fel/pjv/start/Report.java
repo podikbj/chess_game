@@ -17,11 +17,12 @@ public class Report {
     private boolean ReportIsFirstInUse = false;
     private List<String> moveSequence = GameManager.getInstance().getMoveSequence();
     
-    private void createReport() throws IOException {
-        Date dateNow = new Date();
-        SimpleDateFormat formatDate = new SimpleDateFormat("YYYY.MM.DD");
+    public void createReport() throws IOException {
 
-        File myFile = new File(formatDate + "Game.txt");
+        String gameDate = new SimpleDateFormat("YYYY.MM.DD").format(new Date());
+        
+
+        File myFile = new File("src/main/resources/" + gameDate + "Game.pgn");
 
         if (ReportIsFirstInUse == false) {
             try {

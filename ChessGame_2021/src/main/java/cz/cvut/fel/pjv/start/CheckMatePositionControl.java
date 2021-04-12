@@ -4,6 +4,7 @@ import cz.cvut.fel.pjv.view.BoardPanel;
 import cz.cvut.fel.pjv.chessgame.King;
 import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
+import cz.cvut.fel.pjv.view.StartMenu;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,8 +22,8 @@ public class CheckMatePositionControl {
     private Piece attaker = null;
 
     public CheckMatePositionControl() {
-        setbKing();
-        setwKing();
+        setKing(1);
+        setKing(0);
     }
 
     public boolean isChecked(boolean whiteIsActive) {
@@ -167,26 +168,22 @@ public class CheckMatePositionControl {
         return currentKingPosition;
     }
 
-    public void setwKing() {
+    public void setKing(int color) {
         GameManager gameManager = GameManager.getInstance();
-        LinkedList<Piece> wPieceses = gameManager.getwPieceses();
+        
+        LinkedList<Piece> pieces = (!StartMenu.isManual) 
+                ?  gameManager.getPieces(color) : gameManager.getRemovedPieceses(color);
 
-        wKing = wPieceses.stream()
+        if (pieces == null) { return; }
+        Piece king = pieces.stream()
                 .filter(p -> p.toString()
                 .equals("K"))
                 .findAny().get();
-
-    }
-
-    public void setbKing() {
-        GameManager gameManager = GameManager.getInstance();
-
-        LinkedList<Piece> bPieceses = gameManager.getbPieceses();
-
-        bKing = bPieceses.stream()
-                .filter(p -> p.toString()
-                .equals("K"))
-                .findAny().get();
+        if (color == 1) {
+            wKing = king;
+        } else {
+            bKing = king;
+        }
 
     }
 
@@ -209,7 +206,7 @@ public class CheckMatePositionControl {
         Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
         List<Tile> tempList = getEmptyTilesAroundKing(whiteIsActive);
         GameManager gameManager = GameManager.getInstance();
-        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getbPieceses() : gameManager.getwPieceses();
+        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getPieces(0) : gameManager.getPieces(1);
         for (Piece p : pieceses) {
             for (Tile t : tempList) {
                 if (p.isMoveAllowed(t)) {
@@ -228,22 +225,28 @@ public class CheckMatePositionControl {
 
     private boolean doesMoveCauseCheck(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive) {
         boolean b = false;
+        if (currentPiece != startTile.getCurrentPiece()) {
+            return b;
+        }
         Tile currentKingPosition = getCurrentKingPosition(whiteIsActive);
         GameManager gameManager = GameManager.getInstance();
-        if (currentPiece == startTile.getCurrentPiece()) {
-            startTile.removePiece();
-            finTile.setCurrentPiece(currentPiece);
-        }
 
-        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getbPieceses() : gameManager.getwPieceses();
+        startTile.removePiece();
+        currentPiece.setCurrentTile(new Tile(1, 8, 8));
+        //finTile.setCurrentPiece(currentPiece);     
+
+        LinkedList<Piece> pieceses = (whiteIsActive == true) ? gameManager.getPieces(0) : gameManager.getPieces(1);
         for (Piece p : pieceses) {
             if (p.isMoveAllowed(currentKingPosition)) {
                 b = true;
                 break;
             }
         }
+        
+        //finTile.removePiece();
+        currentPiece.setCurrentTile(startTile);
         startTile.setCurrentPiece(currentPiece);
-        finTile.removePiece();
+        
 
         return b;
     }

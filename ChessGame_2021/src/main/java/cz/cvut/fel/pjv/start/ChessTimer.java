@@ -18,7 +18,8 @@ public class ChessTimer extends Thread {
     }
 
     @Override
-    public void run() {
+//    public void run() {
+     public synchronized void run() {
         super.run();
         while (!clock.outOfTime()) {
             if (colorThread == boardPanel.isWhiteIsActive()) {

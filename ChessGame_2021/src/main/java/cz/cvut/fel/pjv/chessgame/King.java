@@ -16,7 +16,7 @@ public class King extends Piece {
         if (super.isTheSameColor(finTile)) {
             return b;
         }
-         //check position for another king, they can not be in adjacent tiles
+        //check position for another king, they can not be in adjacent tiles
         if (!finTile.getIsEmpty() && finTile.getCurrentPiece().toString().equals("K")) {
             return b;
         }
@@ -52,7 +52,6 @@ public class King extends Piece {
     @Override
     public boolean move(Tile finTile) {
         boolean b = super.move(finTile);
-        wasMoved = true;
         return b;
     }
 

@@ -23,14 +23,13 @@ public class Tile {
 
     public boolean isOnStrike(int color) {
         boolean b = false;
-        LinkedList<Piece> pieces;
+        LinkedList<Piece> pieces = null;
         GameManager gameManager = GameManager.getInstance();
-        if (color == 0) {
-            pieces = gameManager.getwPieceses();
-        } else {
-            pieces = gameManager.getbPieceses();
-        }
 
+        pieces = gameManager.getPieces(color);
+        
+        if (pieces == null) { return b; }
+        
         for (Piece p : pieces) {
             b = p.isMoveAllowed(this);
             if (!b) {
@@ -73,20 +72,22 @@ public class Tile {
 
     public String coordinatesString() {
         chMap.clear();
-        chMap.put(1, "a");
-        chMap.put(2, "b");
-        chMap.put(3, "c");
-        chMap.put(4, "d");
-        chMap.put(5, "e");
-        chMap.put(6, "f");
-        chMap.put(7, "g");
-        chMap.put(8, "h");
+        chMap.put(4, "a");
+        chMap.put(5, "b");
+        chMap.put(6, "c");
+        chMap.put(7, "d");
+        chMap.put(8, "e");
+        chMap.put(9, "f");
+        chMap.put(10, "g");
+        chMap.put(11, "h");
 
-        return chMap.get(x) + Integer.toString(y);
+        return chMap.get(x) + Integer.toString(y + 1);
     }
 
     public void setIsEmpty(boolean isEmpty) {
         this.isEmpty = isEmpty;
     }
+    
+    
 
 }

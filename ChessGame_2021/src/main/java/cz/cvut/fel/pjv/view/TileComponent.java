@@ -13,26 +13,36 @@ import javax.swing.JComponent;
 
 public class TileComponent extends JComponent {
 
-    private BoardPanel boardPanel;
+    private GamePanels boardPanel;
     private Tile currentTile;
     private int xC = 0;
     private int yC = 0;
     private int color;
     private boolean displayPiece;
 
-    public TileComponent(BoardPanel boardPanel, Tile currentTile) {
+    public TileComponent(GamePanels boardPanel, Tile currentTile) {
 
         this.boardPanel = boardPanel;
         this.currentTile = currentTile;
-        this.yC = currentTile.getX();
         this.xC = currentTile.getY();
+        this.yC = currentTile.getX();
         this.color = currentTile.getColor();
         this.displayPiece = true;
+//        if (xC == 0) {
+//            this.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.YELLOW));
+//        }
+//        if (xC == 7) {
+//            this.setBorder(BorderFactory.createMatteBorder(2, 0, 0, 0, Color.YELLOW));
+//        }
+//        if (yC == 0) {
+//            this.setBorder(BorderFactory.createMatteBorder(0, 2, 0, 0, Color.YELLOW));
+//        }
+//        if (yC == 7) {
+//            this.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 2, Color.YELLOW));
+//        }
     }
 
     public void paintComponent(Graphics g) {
-
-        //super.paintComponent(g);
 
         if (this.color == 1) {
             g.setColor(new Color(221, 192, 127));
@@ -68,6 +78,14 @@ public class TileComponent extends JComponent {
 
     public void setDisplayPiece(boolean displayPiece) {
         this.displayPiece = displayPiece;
+    }
+
+    public void setxC(int xC) {
+        this.xC = xC;
+    }
+
+    public void setyC(int yC) {
+        this.yC = yC;
     }
     
     

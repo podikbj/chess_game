@@ -46,7 +46,6 @@ public class Pawn extends Piece {
     @Override
     public boolean move(Tile finTile) {
         boolean b = super.move(finTile);
-        wasMoved = true;
         return b;
     }
 

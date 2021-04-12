@@ -6,10 +6,11 @@ import cz.cvut.fel.pjv.chessgame.King;
 import cz.cvut.fel.pjv.chessgame.Knight;
 import cz.cvut.fel.pjv.chessgame.Pawn;
 import cz.cvut.fel.pjv.chessgame.Piece;
-import cz.cvut.fel.pjv.chessgame.Player;
+import cz.cvut.fel.pjv.chessgame.Players;
 import cz.cvut.fel.pjv.chessgame.Queen;
 import cz.cvut.fel.pjv.chessgame.Rook;
 import cz.cvut.fel.pjv.chessgame.Tile;
+import cz.cvut.fel.pjv.view.StartMenu;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -33,6 +34,8 @@ public class GameManager {
     private static GameManager instance = null;
 
     private LinkedList<Tile> tileList = new LinkedList<Tile>();
+    private LinkedList<Tile> leftSideTileList = new LinkedList<Tile>();
+
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
     private CheckMatePositionControl checkMatePositionControl;
@@ -40,12 +43,12 @@ public class GameManager {
     private LinkedList<Piece> wPieceses = new LinkedList<Piece>();
     private LinkedList<Piece> bPieceses = new LinkedList<Piece>();
 
-    //private Tile[][] tileArray = new Tile[8][8];
-    //private static Player activePlayer;
+    private LinkedList<Piece> wRemovedPieceses = new LinkedList<Piece>();
+    private LinkedList<Piece> bRemovedPieceses = new LinkedList<Piece>();
+
     public static GameManager getInstance() {
         if (instance == null) {
             instance = new GameManager();
-            // activePlayer = player;
         }
         return instance;
     }
@@ -53,7 +56,6 @@ public class GameManager {
     private GameManager() {
         initializeTiles();
         initializePieces();
-        //initializeCheckMatePositionControl();
     }
 
     public void initializeCheckMatePositionControl() {
@@ -64,27 +66,27 @@ public class GameManager {
     private Tile createTile(int color, int x, int y) {
         Tile tile = new Tile(color, x, y);
         tileList.add(tile);
-        //tileArray[x][y] = tile;
         return tile;
     }
 
     private void initializeTiles() {
-        // int color = 0;
+
         for (int j = 7; j >= 0; j--) {
-            for (int i = 0; i < 8; i++) {
+            //     for (int j = 0; j < 8; j++) {
+            for (int i = 0; i < 12; i++) {
                 if (i % 2 != 0) {
                     if (j % 2 != 0) {
-                        createTile(0, i, j);
+                        createTile(0, i, j); //
                     } else {
-                        createTile(1, i, j);
+                        createTile(1, i, j); //
                     }
                 }
 
                 if (i % 2 == 0) {
                     if (j % 2 == 0) {
-                        createTile(0, i, j);
+                        createTile(0, i, j); //
                     } else {
-                        createTile(1, i, j);
+                        createTile(1, i, j); //
                     }
                 }
             }
@@ -93,19 +95,31 @@ public class GameManager {
 
     private void addTilesToList(int color) {
 
-        if (color == 0) {
-            tempTileList = tileList.stream()
-                    .filter(p -> p.getY() == 7)
-                    .sorted(Comparator.comparing(Tile::getX))
-                    .collect(toList());
-        }
-
-        if (color == 1) {
+        if (!StartMenu.isManual && color == 1) {
             tempTileList = tileList.stream()
                     .filter(p -> p.getY() == 0)
                     .sorted(Comparator.comparing(Tile::getX))
                     .collect(toList());
         }
+        if (!StartMenu.isManual && color == 0) {
+            tempTileList = tileList.stream()
+                    .filter(p -> p.getY() == 7)
+                    .sorted(Comparator.comparing(Tile::getX))
+                    .collect(toList());
+        }
+        if (StartMenu.isManual && color == 0) {
+            tempTileList = tileList.stream()
+                    .filter(p -> p.getX() == 2)
+                    .sorted(Comparator.comparing(Tile::getY))
+                    .collect(toList());
+        }
+        if (StartMenu.isManual && color == 1) {
+            tempTileList = tileList.stream()
+                    .filter(p -> p.getX() == 0)
+                    .sorted(Comparator.comparing(Tile::getY))
+                    .collect(toList());
+        }
+
     }
 
     public void move(Piece currentPiece, Tile finTile) {
@@ -113,132 +127,138 @@ public class GameManager {
     }
 
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive, int castling) {
-        return currentPiece.isMoveAllowed(finTile)
-                && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, castling);
+        return checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, castling)
+                && currentPiece.isMoveAllowed(finTile);
     }
 
-//    public boolean isChecked(Piece currentPiece, Tile finTile, boolean whiteIsActive) {
-//        return CheckMatePositionControl.isChecked(currentPiece, finTile, whiteIsActive);
-//    }
     private void setPieceOnTile(int color) {
-        int x = 0;
+        int k = 0;
         Piece[] tempPieceses = new Piece[8];
         for (Tile el : tempTileList) {
-            x = el.getX();
-            switch (x) {
+
+            k = (!StartMenu.isManual) ? el.getX() - 4 : el.getY();
+
+            switch (k) {
                 case (0):
-                    tempPieceses[x] = new Rook(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Rook(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (1):
-                    tempPieceses[x] = new Knight(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Knight(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (2):
-                    tempPieceses[x] = new Bishop(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Bishop(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (3):
-                    tempPieceses[x] = new Queen(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Queen(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (4):
-                    tempPieceses[x] = new King(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new King(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (5):
-                    tempPieceses[x] = new Bishop(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Bishop(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (6):
-                    tempPieceses[x] = new Knight(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Knight(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
                 case (7):
-                    tempPieceses[x] = new Rook(color);
-                    el.setCurrentPiece(tempPieceses[x]);
+                    tempPieceses[k] = new Rook(color, el);
+                    el.setCurrentPiece(tempPieceses[k]);
                     if (color == 1) {
-                        wPieceses.add(tempPieceses[x]);
+                        wPieceses.add(tempPieceses[k]);
                     } else {
-                        bPieceses.add(tempPieceses[x]);
+                        bPieceses.add(tempPieceses[k]);
                     }
                     break;
             }
         }
 
-//        if (color == 1) {
-//            wPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
-//        } else {
-//            bPieceses = Arrays.copyOf(tempPieceses, tempPieceses.length);
-//        }
     }
 
     private void initializePieces() {
 
         final int black = 0;
-        tileList.stream().filter(p -> p.getY() == 6).forEach(p -> p.setCurrentPiece(new Pawn(black)));
+        if (!StartMenu.isManual) {
+            tileList.stream().filter(t -> t.getY() == 6 && t.getX() > 3).forEach((t)
+                    -> {
+                t.setCurrentPiece(new Pawn(black, t));
+                bPieceses.add(t.getCurrentPiece());
+            }
+            );
+        } else {
+            tileList.stream().filter(t -> t.getX() == 3).forEach((t)
+                    -> {
+                t.setCurrentPiece(new Pawn(black, t));
+                bRemovedPieceses.add(t.getCurrentPiece());
+            }
+            );
+        }
+
         addTilesToList(black);
         setPieceOnTile(black);
 
         final int white = 1;
-        tileList.stream().filter(p -> p.getY() == 1).forEach(p -> p.setCurrentPiece(new Pawn(white)));
+        if (!StartMenu.isManual) {
+            tileList.stream().filter(t -> t.getY() == 1 && t.getX() > 3).forEach((t)
+                    -> {
+                t.setCurrentPiece(new Pawn(white, t));
+                wPieceses.add(t.getCurrentPiece());
+            }
+            );
+        } else {
+            tileList.stream().filter(t -> t.getX() == 1).forEach((t)
+                    -> {
+                t.setCurrentPiece(new Pawn(white, t));
+                wRemovedPieceses.add(t.getCurrentPiece());
+            }
+            );
+        }
+
         tempTileList.clear();
         addTilesToList(white);
         setPieceOnTile(white);
 
-        tileList.stream().filter(p -> p.getIsEmpty() == false).forEach(p -> p.getCurrentPiece().setCurrentTile(p));
-
-    }
-
-    private void createMoves(Tile currentTile, Tile finTile) {
-        Piece currentPiece = currentTile.getCurrentPiece();
-        if (currentPiece.getColor() == 1) {
-            //whiteInCheck();
-            //whiteCheckMated();
-        }
-        if (currentPiece.getColor() == 0) {
-            //blackInCheck();
-            //blackCheckMated();
-        }
-
-        if (currentPiece.isMoveAllowed(finTile)) {
-            currentPiece.move(finTile);
-        }
     }
 
     public LinkedList<Tile> getTileList() {
@@ -249,83 +269,47 @@ public class GameManager {
         return moveSequence;
     }
 
-    public void changePawn(Piece currentPiece, Tile currentTile, boolean whiteIsActive, int x) { 
+    public void changePawn(Piece currentPiece, Tile currentTile, boolean whiteIsActive, int x) {
         int color = (whiteIsActive == true) ? 1 : 0;
         Piece newPiece = null;
         switch (x) {
             case 0:
-                newPiece = new Queen(color);
+                newPiece = new Queen(color, currentTile);
                 break;
             case 1:
-                newPiece = new Rook(color);
+                newPiece = new Rook(color, currentTile);
                 break;
             case 2:
-                newPiece = new Bishop(color);
+                newPiece = new Bishop(color, currentTile);
                 break;
             case 3:
-                newPiece = new Knight(color);
+                newPiece = new Knight(color, currentTile);
                 break;
             case 4:
- 
+
                 break;
         }
         currentTile.setCurrentPiece(newPiece);
     }
-    
 
-
-//    private void createReport() throws IOException {
-//        Date dateNow = new Date();
-//        SimpleDateFormat formatDate = new SimpleDateFormat("YYYY.MM.DD");
-//
-//        File myFile = new File(formatDate + "Game.txt");
-//
-//        if (ReportIsFirstInUse == false) {
-//            try {
-//                PrintWriter writer = new PrintWriter(myFile);
-//                logger.info("Clearing the contents of the Reports.txt file starts");
-//                writer.print("");
-//                writer.close();
-//            } catch (Exception e) {
-//                logger.log(Level.SEVERE, "Error occur in file cleaning", e);
-//            }
-//            ReportIsFirstInUse = true;
-//        }
-//
-//        try {
-//            PrintWriter writer = new PrintWriter(myFile);
-//            logger.info("Printing GameReport to file starts");
-//
-////            writer.println("============================================================");
-////            writer.println("HOUSE CONFIGURATION REPORT");
-////            writer.println("============================================================");
-//            int counter = 1;
-//            for (String str : moveSequence) {
-//                str = counter + ". " + str;
-//                writer.println(str);
-//                counter += 1;
-//            }
-//            writer.flush();
-//            writer.close();
-//        } catch (IOException ex) {
-//            logger.log(Level.SEVERE, "Error occur in printing GameReport", ex);
-//            ex.printStackTrace();
-//        }
-//
-//    }
-//    public Tile[][] getTileArray() {
-//        return tileArray;
-//    }
     public CheckMatePositionControl getCheckMatePositionControl() {
         return checkMatePositionControl;
     }
 
-    public LinkedList<Piece> getwPieceses() {
-        return wPieceses;
+    public LinkedList<Piece> getPieces(int color) {
+        LinkedList<Piece> pieceses = null;
+        pieceses = (color == 0) ? bPieceses : wPieceses;
+        return pieceses;
     }
 
-    public LinkedList<Piece> getbPieceses() {
-        return bPieceses;
+    public LinkedList<Piece> getRemovedPieceses(int color) {
+        LinkedList<Piece> removedPieceses = null;
+        removedPieceses = (color == 0) ? bRemovedPieceses : wRemovedPieceses;
+        return removedPieceses;
+    }
+
+    public LinkedList<Tile> getLeftSideTileList() {
+        return leftSideTileList;
     }
 
 }

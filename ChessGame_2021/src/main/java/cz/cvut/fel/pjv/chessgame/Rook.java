@@ -30,7 +30,9 @@ public class Rook extends Piece {
     @Override
     public boolean move(Tile finTile) {
         boolean b = super.move(finTile);
-        wasMoved = true;
+//        if (currentTile.getX() > 3) {
+//                 wasMoved = true;  
+//        }
         return b;
     }
 
