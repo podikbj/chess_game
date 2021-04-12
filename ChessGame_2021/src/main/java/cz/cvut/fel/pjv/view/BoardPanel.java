@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.*;
 
 @SuppressWarnings("serial")
-public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener, GamePanels {
+public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
 
     private final TileComponent[][] boardTileComponents;
     //private final TileComponent[][] leftSideTileComponents;
