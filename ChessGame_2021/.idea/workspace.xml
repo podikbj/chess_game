@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="488ea70e-280b-4359-bc0d-50c8dd33d69b" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1qbV72zGNygitziBwJsLxvUI8Bb" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+  </component>
+  <component name="RunManager" selected="JUnit.QueenTest.isHorizontalMoveTestThenReturnTrue">
+    <configuration name="Game" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="cz.cvut.fel.pjv.view.Game" />
+      <module name="ChessGame_2021" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cz.cvut.fel.pjv.view.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PawnTest.isMoveAllowedTest_d2d4_TilesBetweenNotEmptyWasNotMovedReturnFalse" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChessGame_2021" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cz.cvut.fel.pjv.chessgame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="cz.cvut.fel.pjv.chessgame" />
+      <option name="MAIN_CLASS_NAME" value="cz.cvut.fel.pjv.chessgame.PawnTest" />
+      <option name="METHOD_NAME" value="isMoveAllowedTest_d2d4_TilesBetweenNotEmptyWasNotMovedReturnFalse" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PawnTest.isMoveAllowedTest_e2e4_AllTilesBetweenAreEmptyWasNotMovedReturnTrue" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChessGame_2021" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cz.cvut.fel.pjv.chessgame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="cz.cvut.fel.pjv.chessgame" />
+      <option name="MAIN_CLASS_NAME" value="cz.cvut.fel.pjv.chessgame.PawnTest" />
+      <option name="METHOD_NAME" value="isMoveAllowedTest_e2e4_AllTilesBetweenAreEmptyWasNotMovedReturnTrue" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QueenTest.isHorizontalMoveTestThenReturnTrue" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChessGame_2021" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cz.cvut.fel.pjv.chessgame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="cz.cvut.fel.pjv.chessgame" />
+      <option name="MAIN_CLASS_NAME" value="cz.cvut.fel.pjv.chessgame.QueenTest" />
+      <option name="METHOD_NAME" value="isHorizontalMoveTestThenReturnTrue" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="QueenTest.toStringTestEquals_Q" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="ChessGame_2021" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="cz.cvut.fel.pjv.chessgame.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="cz.cvut.fel.pjv.chessgame" />
+      <option name="MAIN_CLASS_NAME" value="cz.cvut.fel.pjv.chessgame.QueenTest" />
+      <option name="METHOD_NAME" value="toStringTestEquals_Q" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.QueenTest.isHorizontalMoveTestThenReturnTrue" />
+        <item itemvalue="JUnit.QueenTest.toStringTestEquals_Q" />
+        <item itemvalue="JUnit.PawnTest.isMoveAllowedTest_d2d4_TilesBetweenNotEmptyWasNotMovedReturnFalse" />
+        <item itemvalue="Application.Game" />
+        <item itemvalue="JUnit.PawnTest.isMoveAllowedTest_e2e4_AllTilesBetweenAreEmptyWasNotMovedReturnTrue" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="488ea70e-280b-4359-bc0d-50c8dd33d69b" name="Default Changelist" comment="" />
+      <created>1617348105773</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1617348105773</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="93" y="93" width="1095" height="535" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog" timestamp="1617380733322">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state x="93" y="93" width="1095" height="535" key="#com.intellij.execution.junit2.states.ComparisonFailureState$DiffDialog/0.0.1280.720@0.0.1280.720" timestamp="1617380733322" />
+    <state width="426" height="466" key="DebuggerActiveHint" timestamp="1617380773200">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="426" height="466" key="DebuggerActiveHint/0.0.1280.720@0.0.1280.720" timestamp="1617380773200" />
+    <state width="1237" height="296" key="GridCell.Tab.0.bottom" timestamp="1617479836275">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.0.bottom/0.0.1280.720@0.0.1280.720" timestamp="1617479836275" />
+    <state width="1237" height="296" key="GridCell.Tab.0.center" timestamp="1617479836274">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.0.center/0.0.1280.720@0.0.1280.720" timestamp="1617479836274" />
+    <state width="1237" height="296" key="GridCell.Tab.0.left" timestamp="1617479836274">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.0.left/0.0.1280.720@0.0.1280.720" timestamp="1617479836274" />
+    <state width="1237" height="296" key="GridCell.Tab.0.right" timestamp="1617479836275">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.0.right/0.0.1280.720@0.0.1280.720" timestamp="1617479836275" />
+    <state width="1237" height="296" key="GridCell.Tab.1.bottom" timestamp="1617479836277">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.1.bottom/0.0.1280.720@0.0.1280.720" timestamp="1617479836277" />
+    <state width="1237" height="296" key="GridCell.Tab.1.center" timestamp="1617479836275">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.1.center/0.0.1280.720@0.0.1280.720" timestamp="1617479836275" />
+    <state width="1237" height="296" key="GridCell.Tab.1.left" timestamp="1617479836275">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.1.left/0.0.1280.720@0.0.1280.720" timestamp="1617479836275" />
+    <state width="1237" height="296" key="GridCell.Tab.1.right" timestamp="1617479836275">
+      <screen x="0" y="0" width="1280" height="720" />
+    </state>
+    <state width="1237" height="296" key="GridCell.Tab.1.right/0.0.1280.720@0.0.1280.720" timestamp="1617479836275" />
+  </component>
+</project>

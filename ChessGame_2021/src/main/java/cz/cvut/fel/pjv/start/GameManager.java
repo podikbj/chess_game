@@ -23,6 +23,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
@@ -34,17 +35,12 @@ public class GameManager {
     private static GameManager instance = null;
 
     private LinkedList<Tile> tileList = new LinkedList<Tile>();
-    private LinkedList<Tile> leftSideTileList = new LinkedList<Tile>();
 
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
     private CheckMatePositionControl checkMatePositionControl;
 
-    private LinkedList<Piece> wPieceses = new LinkedList<Piece>();
-    private LinkedList<Piece> bPieceses = new LinkedList<Piece>();
-
-    private LinkedList<Piece> wRemovedPieceses = new LinkedList<Piece>();
-    private LinkedList<Piece> bRemovedPieceses = new LinkedList<Piece>();
+    private LinkedList<Piece> pieces = new LinkedList<Piece>();
 
     public static GameManager getInstance() {
         if (instance == null) {
@@ -53,14 +49,10 @@ public class GameManager {
         return instance;
     }
 
-    private GameManager() {
-        initializeTiles();
-        initializePieces();
-    }
+    private GameManager() {}
 
     public void initializeCheckMatePositionControl() {
         checkMatePositionControl = new CheckMatePositionControl();
-
     }
 
     private Tile createTile(int color, int x, int y) {
@@ -69,7 +61,7 @@ public class GameManager {
         return tile;
     }
 
-    private void initializeTiles() {
+    public void initializeTiles() {
 
         for (int j = 7; j >= 0; j--) {
             //     for (int j = 0; j < 8; j++) {
@@ -122,17 +114,22 @@ public class GameManager {
 
     }
 
-    public void move(Piece currentPiece, Tile finTile) {
-        currentPiece.move(finTile);
+    public void move(Piece currentPiece, Tile finTile, Stack<String> tagType) {
+        currentPiece.move(finTile, tagType);
+    }
+    
+    public Tile doCastling(Tile finTile, Stack<String> tagType){
+        return checkMatePositionControl.doCastling(finTile, tagType);
     }
 
-    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, boolean whiteIsActive, int castling) {
-        return checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, castling)
+    public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, int castling) {
+        return checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, castling)
                 && currentPiece.isMoveAllowed(finTile);
     }
 
     private void setPieceOnTile(int color) {
         int k = 0;
+        boolean wasRemoved = (!StartMenu.isManual) ? false : true;
         Piece[] tempPieceses = new Piece[8];
         for (Tile el : tempTileList) {
 
@@ -140,97 +137,65 @@ public class GameManager {
 
             switch (k) {
                 case (0):
-                    tempPieceses[k] = new Rook(color, el);
+                    tempPieceses[k] = new Rook(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (1):
-                    tempPieceses[k] = new Knight(color, el);
+                    tempPieceses[k] = new Knight(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (2):
-                    tempPieceses[k] = new Bishop(color, el);
+                    tempPieceses[k] = new Bishop(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (3):
-                    tempPieceses[k] = new Queen(color, el);
+                    tempPieceses[k] = new Queen(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (4):
-                    tempPieceses[k] = new King(color, el);
+                    tempPieceses[k] = new King(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (5):
-                    tempPieceses[k] = new Bishop(color, el);
+                    tempPieceses[k] = new Bishop(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (6):
-                    tempPieceses[k] = new Knight(color, el);
+                    tempPieceses[k] = new Knight(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
                 case (7):
-                    tempPieceses[k] = new Rook(color, el);
+                    tempPieceses[k] = new Rook(color, el, wasRemoved);
                     el.setCurrentPiece(tempPieceses[k]);
-                    if (color == 1) {
-                        wPieceses.add(tempPieceses[k]);
-                    } else {
-                        bPieceses.add(tempPieceses[k]);
-                    }
+                    pieces.add(tempPieceses[k]);
                     break;
             }
+
         }
 
     }
 
-    private void initializePieces() {
+    public void initializePieces() {
 
         final int black = 0;
         if (!StartMenu.isManual) {
             tileList.stream().filter(t -> t.getY() == 6 && t.getX() > 3).forEach((t)
                     -> {
-                t.setCurrentPiece(new Pawn(black, t));
-                bPieceses.add(t.getCurrentPiece());
+                t.setCurrentPiece(new Pawn(black, t, false));
+                pieces.add(t.getCurrentPiece());
             }
             );
         } else {
             tileList.stream().filter(t -> t.getX() == 3).forEach((t)
                     -> {
-                t.setCurrentPiece(new Pawn(black, t));
-                bRemovedPieceses.add(t.getCurrentPiece());
+                t.setCurrentPiece(new Pawn(black, t, true));
             }
             );
         }
@@ -242,15 +207,15 @@ public class GameManager {
         if (!StartMenu.isManual) {
             tileList.stream().filter(t -> t.getY() == 1 && t.getX() > 3).forEach((t)
                     -> {
-                t.setCurrentPiece(new Pawn(white, t));
-                wPieceses.add(t.getCurrentPiece());
+                t.setCurrentPiece(new Pawn(white, t, false));
+                pieces.add(t.getCurrentPiece());
             }
             );
         } else {
             tileList.stream().filter(t -> t.getX() == 1).forEach((t)
                     -> {
-                t.setCurrentPiece(new Pawn(white, t));
-                wRemovedPieceses.add(t.getCurrentPiece());
+                t.setCurrentPiece(new Pawn(white, t, true));
+                pieces.add(t.getCurrentPiece());
             }
             );
         }
@@ -274,16 +239,16 @@ public class GameManager {
         Piece newPiece = null;
         switch (x) {
             case 0:
-                newPiece = new Queen(color, currentTile);
+                newPiece = new Queen(color, currentTile, false);
                 break;
             case 1:
-                newPiece = new Rook(color, currentTile);
+                newPiece = new Rook(color, currentTile, false);
                 break;
             case 2:
-                newPiece = new Bishop(color, currentTile);
+                newPiece = new Bishop(color, currentTile, false);
                 break;
             case 3:
-                newPiece = new Knight(color, currentTile);
+                newPiece = new Knight(color, currentTile, false);
                 break;
             case 4:
 
@@ -296,20 +261,34 @@ public class GameManager {
         return checkMatePositionControl;
     }
 
-    public LinkedList<Piece> getPieces(int color) {
-        LinkedList<Piece> pieceses = null;
-        pieceses = (color == 0) ? bPieceses : wPieceses;
-        return pieceses;
+    public List<Piece> getPieces() {
+        List<Piece> p = null;
+        p = pieces.stream()
+                .filter(s -> !s.isWasRemoved())
+                .collect(toList());
+        return p;
     }
 
-    public LinkedList<Piece> getRemovedPieceses(int color) {
-        LinkedList<Piece> removedPieceses = null;
-        removedPieceses = (color == 0) ? bRemovedPieceses : wRemovedPieceses;
+    public List<Piece> getPieces(int color) {
+        List<Piece> p = null;
+        p = pieces.stream()
+                .filter(s -> !s.isWasRemoved())
+                .filter(s -> s.getColor() == color)
+                .collect(toList());
+        return p;
+    }
+
+    public List<Piece> getRemovedPieces() {
+        List<Piece> removedPieceses = null;
+        removedPieceses = pieces.stream()
+                .filter(p -> p.isWasRemoved())
+                .collect(toList());
+        //removedPieceses = (color == 0) ? bRemovedPieceses : wRemovedPieceses;
         return removedPieceses;
     }
 
-    public LinkedList<Tile> getLeftSideTileList() {
-        return leftSideTileList;
-    }
+//    public LinkedList<Tile> getLeftSideTileList() {
+//        return leftSideTileList;
+//    }
 
 }

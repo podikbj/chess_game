@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -20,13 +21,17 @@ public abstract class Piece {
     protected String imageFilePath;
     private BufferedImage pieceImage;
     protected boolean wasMoved = false;
-    //private GameManager gameManager = GameManager.getInstance();
-    //private GameManager gameManager;
+    protected boolean wasRemoved;
+    private GameManager gameManager = GameManager.getInstance();
+    private List<Tile> tileList = gameManager.getTileList();
+    protected List<Tile> tempList = null;
 
-    public Piece(int color, Tile tile, String blackPiecePath, String whitePiecePath) {
+    public Piece(int color, Tile tile, String blackPiecePath, String whitePiecePath, boolean wasRemoved) {
         this.color = color;
         this.currentTile = tile;
+        this.wasRemoved = wasRemoved;
         imageFilePath = (this.color == 0) ? blackPiecePath : whitePiecePath;
+        this.tileList = gameManager.getTileList();
         try {
             if (this.pieceImage == null) {
                 this.pieceImage = ImageIO.read(new File(imageFilePath));
@@ -38,6 +43,8 @@ public abstract class Piece {
     }
 
     public abstract boolean isMoveAllowed(Tile finTile);
+
+    public abstract List<Tile> getIntermediateTiles(Tile finTile);
 
     public boolean isDiagonalMove(Tile finTile) {
         return (Math.abs(finTile.getX() - currentTile.getX()) == Math.abs(finTile.getY() - currentTile.getY()));
@@ -55,9 +62,15 @@ public abstract class Piece {
     protected boolean isAnyTileIsOccupiedHorizontalMove(Tile finTile) {
 
         boolean b = false;
-        GameManager gameManager = GameManager.getInstance();
-        List<Tile> tileList = gameManager.getTileList();
-        b = tileList.stream()
+        tempList = getListOfIntermediateHorizontalTiles(finTile);
+        if (tempList != null) {
+            b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
+        }
+        return b;
+    }
+
+    public List<Tile> getListOfIntermediateHorizontalTiles(Tile finTile) {
+        tempList = tileList.stream()
                 .filter(p -> p.getY() == currentTile.getY())
                 .filter((p)
                         -> {
@@ -71,18 +84,23 @@ public abstract class Piece {
                     return x;
                 }
                 )
-                .filter(p -> !p.getIsEmpty())
-                .findAny().isPresent();
+                .collect(toList());
 
-        return b;
+        return tempList;
     }
 
     protected boolean isAnyTileIsOccupiedVerticalMove(Tile finTile) {
 
         boolean b = false;
-        GameManager gameManager = GameManager.getInstance();
-        List<Tile> tileList = gameManager.getTileList();
-        b = tileList.stream()
+        tempList = getListOfIntermediateVerticalTiles(finTile);
+        if (tempList != null) {
+            b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
+        }
+        return b;
+    }
+
+    public List<Tile> getListOfIntermediateVerticalTiles(Tile finTile) {
+        tempList = tileList.stream()
                 .filter(p -> p.getX() == currentTile.getX())
                 .filter((p)
                         -> {
@@ -96,17 +114,25 @@ public abstract class Piece {
                     return y;
                 }
                 )
-                .filter(p -> !p.getIsEmpty())
-                .findAny().isPresent();
-        return b;
+                .collect(toList());
+
+        return tempList;
     }
 
     protected boolean isAnyTileIsOccupiedDiagonalMove(Tile finTile) {
 
         boolean b = false;
-        GameManager gameManager = GameManager.getInstance();
-        List<Tile> tileList = gameManager.getTileList();
-        b = tileList.stream()
+        tempList = getListOfIntermediateDiagonalTiles(finTile);
+        if (tempList != null) {
+            b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
+        }
+
+        return b;
+    }
+
+    public List<Tile> getListOfIntermediateDiagonalTiles(Tile finTile) {
+
+        tempList = tileList.stream()
                 .filter(p -> Math.abs(p.getX() - currentTile.getX()) == Math.abs(p.getY() - currentTile.getY()))
                 .filter((p)
                         -> {
@@ -150,9 +176,8 @@ public abstract class Piece {
                 }
                 )
                 .
-                filter(p -> !p.getIsEmpty())
-                .findAny().isPresent();
-        return b;
+                collect(toList());
+        return tempList;
     }
 
     private void addMoveEntry(Tile finTile) {
@@ -160,45 +185,16 @@ public abstract class Piece {
         gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
     }
 
-    public boolean removePieceFromArray(Tile finTile) {
-
-        if (!StartMenu.isManual && finTile.getIsEmpty()) {
-            return false;
-        }
-        LinkedList<Piece> pieces;
-        LinkedList<Piece> removedPieces;
-        Piece removedPiece = finTile.getCurrentPiece();
-        GameManager gameManager = GameManager.getInstance();
-
-        pieces = gameManager.getPieces(removedPiece.color);
-        removedPieces = gameManager.getRemovedPieceses(removedPiece.color);
-
-        if (!StartMenu.isManual) {
-            if (pieces.contains(removedPiece)) {
-                pieces.remove(removedPiece);
-                removedPieces.add(removedPiece);
-                return true;
-            }
-        } else {
-            if (removedPieces.contains(removedPiece)) {
-                removedPieces.remove(removedPiece);
-                pieces.add(removedPiece);
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    public boolean move(Tile finTile) {
+    public boolean move(Tile finTile, Stack<String> tagType) {
 
         if (!StartMenu.isManual) {
             wasMoved = true;
         }
         if (!finTile.getIsEmpty() && this.color != finTile.getCurrentPiece().color) {
+            tagType.push("x");
             Piece removedPiece = finTile.getCurrentPiece();
             removedPiece.setCurrentTile(null);
-            removePieceFromArray(finTile);
+            removedPiece.wasRemoved = true;
             finTile.removePiece();
 
             currentTile.removePiece();
@@ -252,4 +248,13 @@ public abstract class Piece {
         return wasMoved;
     }
 
+    public boolean isWasRemoved() {
+        return wasRemoved;
+    }
+
+    public void setWasMoved(boolean wasMoved) {
+        this.wasMoved = wasMoved;
+    }
+    
+    
 }

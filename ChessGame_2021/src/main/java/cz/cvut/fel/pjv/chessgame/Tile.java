@@ -3,7 +3,9 @@ package cz.cvut.fel.pjv.chessgame;
 import cz.cvut.fel.pjv.start.GameManager;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import static java.util.stream.Collectors.toList;
 
 public class Tile {
 
@@ -23,13 +25,14 @@ public class Tile {
 
     public boolean isOnStrike(int color) {
         boolean b = false;
-        LinkedList<Piece> pieces = null;
-        GameManager gameManager = GameManager.getInstance();
 
-        pieces = gameManager.getPieces(color);
-        
-        if (pieces == null) { return b; }
-        
+        GameManager gameManager = GameManager.getInstance();
+        List<Piece> pieces = gameManager.getPieces();
+
+        if (pieces == null) {
+            return b;
+        }
+
         for (Piece p : pieces) {
             b = p.isMoveAllowed(this);
             if (!b) {
@@ -87,7 +90,5 @@ public class Tile {
     public void setIsEmpty(boolean isEmpty) {
         this.isEmpty = isEmpty;
     }
-    
-    
 
 }

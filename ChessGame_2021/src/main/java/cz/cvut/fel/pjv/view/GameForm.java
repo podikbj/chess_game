@@ -186,8 +186,8 @@ public class GameForm extends javax.swing.JFrame {
     private void saveGameInformationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveGameInformationActionPerformed
 
         String gameDate = new SimpleDateFormat("YYYY.MM.dd").format(jgameDate.getDate());
-        String wPlayer = whitePlayerName.getText() + whitePlayerLastName.getText();
-        String bPlayer = blackPlayerName.getText() + blackPlayerLastName.getText();
+        String wPlayer = whitePlayerLastName.getText();
+        String bPlayer = blackPlayerLastName.getText();
 
         File myFile = new File("src/main/resources/"
                 + gameDate
@@ -221,8 +221,12 @@ public class GameForm extends javax.swing.JFrame {
             initialGameData.add(sb.append("[Black \"").append(blackPlayerLastName.getText())
                     .append(", ")
                     .append(blackPlayerName.getText())
-                    .append("\"]"));
+                    .append("\"]")
+                    .append("\n"));
 
+            sb = new StringBuilder();
+            initialGameData.add(sb.append("[Result "));
+            
             for (StringBuilder element : initialGameData) {
                 String str = element.toString();
                 writer.println(str);
@@ -236,10 +240,10 @@ public class GameForm extends javax.swing.JFrame {
         }
 
         Players players = Players.getInstance(whitePlayerName.getText(),
-                whitePlayerLastName.getText(), blackPlayerName.getText(), 
+                whitePlayerLastName.getText(), blackPlayerName.getText(),
                 blackPlayerLastName.getText(), gameDate);
-        
-        new GameWindow();
+
+        new GameWindowBasic();
 
     }//GEN-LAST:event_saveGameInformationActionPerformed
 

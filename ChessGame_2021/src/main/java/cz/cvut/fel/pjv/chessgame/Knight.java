@@ -2,12 +2,14 @@ package cz.cvut.fel.pjv.chessgame;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
 public class Knight extends Piece {
 
-    public Knight(int color, Tile tile) {
+    public Knight(int color, Tile tile, boolean wasRemoved) {
 
-        super(color, tile,"src/main/resources/bknight.png", "src/main/resources/wknight.png");
+        super(color, tile,"src/main/resources/bknight.png",
+                "src/main/resources/wknight.png", wasRemoved);
      
     }
 
@@ -35,14 +37,21 @@ public class Knight extends Piece {
     }
 
     @Override
-    public boolean move(Tile finTile) {
-        boolean b = super.move(finTile);
+    public boolean move(Tile finTile, Stack<String> tagType) {
+        boolean b = super.move(finTile, tagType);
         return b;
     }
     
         @Override
     public String toString() {
         return "N";
+    }
+    
+        @Override
+    public List<Tile> getIntermediateTiles(Tile finTile) {
+        List<Tile> tempList = null;
+
+        return tempList;
     }
 
 }

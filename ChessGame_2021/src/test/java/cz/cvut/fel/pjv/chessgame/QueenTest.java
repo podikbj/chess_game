@@ -24,7 +24,7 @@ public class QueenTest {
     public void mockedConstructorQueen() {
         try (MockedConstruction mocked = mockConstruction(Queen.class)) {
             Tile tile = new Tile(1, 3, 0);
-            Piece queen = new Queen(1, tile);
+            Piece queen = new Queen(1, tile, false);
             when(queen.toString()).thenReturn("Q");
             assertEquals("Q", queen.toString());
             // verify(queen).toString();
@@ -34,7 +34,7 @@ public class QueenTest {
 
     @Test
     public void toStringTestEquals_Q() {
-        Piece queen = new Queen(1, tile);
+        Piece queen = new Queen(1, tile, false);
         assertEquals("Q", queen.toString());
     }
 
@@ -42,7 +42,7 @@ public class QueenTest {
     public void isHorizontalMoveTestThenReturnTrue() {
         tile = mock(Tile.class);
         currentTile = mock(Tile.class);
-        Piece queen = new Queen(1, currentTile);
+        Piece queen = new Queen(1, currentTile, false);
         when(currentTile.getX()).thenReturn(3);
         when(tile.getY()).thenReturn(2);
         when(currentTile.getY()).thenReturn(2);
