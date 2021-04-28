@@ -5,6 +5,7 @@ import cz.cvut.fel.pjv.view.StartMenu;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -22,9 +23,9 @@ public abstract class Piece {
     private BufferedImage pieceImage;
     protected boolean wasMoved = false;
     protected boolean wasRemoved;
-    private GameManager gameManager = GameManager.getInstance();
-    private List<Tile> tileList = gameManager.getTileList();
-    protected List<Tile> tempList = null;
+    protected GameManager gameManager = GameManager.getInstance();
+    protected List<Tile> tileList = gameManager.getTileList();
+    private List<Tile> tempList = null;
 
     public Piece(int color, Tile tile, String blackPiecePath, String whitePiecePath, boolean wasRemoved) {
         this.color = color;
@@ -180,21 +181,22 @@ public abstract class Piece {
         return tempList;
     }
 
-    private void addMoveEntry(Tile finTile) {
+    protected void addMoveEntry(Tile finTile) {
         GameManager gameManager = GameManager.getInstance();
         gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
     }
 
-    public boolean move(Tile finTile, Stack<String> tagType) {
-
+    public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
+        
         if (!StartMenu.isManual) {
             wasMoved = true;
         }
         if (!finTile.getIsEmpty() && this.color != finTile.getCurrentPiece().color) {
-            tagType.push("x");
+            tags.add("x");
             Piece removedPiece = finTile.getCurrentPiece();
             removedPiece.setCurrentTile(null);
             removedPiece.wasRemoved = true;
+            removedPieces.add(removedPiece);
             finTile.removePiece();
 
             currentTile.removePiece();

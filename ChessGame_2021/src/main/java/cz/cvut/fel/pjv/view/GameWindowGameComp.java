@@ -9,11 +9,13 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.logging.Logger;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
@@ -30,7 +32,7 @@ public class GameWindowGameComp {
     private BoardPanel boardPanel;
     private GameManager gameManager = GameManager.getInstance();
     private boolean whiteIsActive = true;
-    private Stack<String> tagType;
+    private HashSet<String> tags = new HashSet<String>();
     private Piece currentPiece = null;
     private Tile tile = null;
     private LinkedList<Tile> tileList;
@@ -39,7 +41,7 @@ public class GameWindowGameComp {
     private JTextArea textArea = new JTextArea();
     private StringBuilder sb = new StringBuilder();
     private Box components = Box.createVerticalBox();
-    private int computer = 0;
+    private int computer = -1; // 0 - black color
 
     public GameWindowGameComp(GameWindowBasic gameWindowBasic, BoardPanel bp) {
 
@@ -47,9 +49,9 @@ public class GameWindowGameComp {
         this.gameWindowFrame = new JFrame("Chess II model");
         gameWindowFrame.setLocation(100, 100);
 
-        this.boardPanel =bp;
-
-        this.tagType = boardPanel.getTagType();
+        this.boardPanel = bp;
+        //this.boardPanel.setComputer();
+        this.tags = boardPanel.getTags();
         this.tileList = gameManager.getTileList();
         this.gameView = gameWindowBasic.getGameView();
 
@@ -89,8 +91,8 @@ public class GameWindowGameComp {
                 }
             }
         });
-        
-                final JButton nGame = new JButton("New game");
+
+        final JButton nGame = new JButton("New game");
         nGame.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
@@ -127,10 +129,27 @@ public class GameWindowGameComp {
     private void fillComponents() {
 
         Box comp = Box.createVerticalBox();
-        final JTextField compInput = new JTextField("Comp", 10);
-        comp.add(compInput);
-        final JButton compTag = new JButton("Comp tag");
+        String[] colors = {Colors.NONE.name().toLowerCase(), Colors.BLACK.name().toLowerCase(), 
+            Colors.WHITE.name().toLowerCase()};
+        final JComboBox comboBox = new JComboBox(colors);
 
+        comboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JComboBox box = (JComboBox) e.getSource();
+                String strColor = (String) box.getSelectedItem();
+                if (strColor.equals("black")) {
+                    computer = 0;
+
+                }
+                if (strColor.equals("white")) {
+                    computer = 1;
+                }
+                boardPanel.setComputer(computer);
+            }
+        });
+        comp.add(comboBox);
+
+        final JButton compTag = new JButton("Comp tag");
         compTag.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 doTag();
@@ -151,7 +170,7 @@ public class GameWindowGameComp {
     }
 
     private void doTag() {
-        boardPanel.doTah();
+        boardPanel.doTah(computer);
     }
 
     public JTextArea getTextArea() {
@@ -161,7 +180,9 @@ public class GameWindowGameComp {
     public void setGameView(String gameView) {
         this.gameView = gameView;
     }
-    
-    
+
+    public int getComputer() {
+        return computer;
+    }
 
 }

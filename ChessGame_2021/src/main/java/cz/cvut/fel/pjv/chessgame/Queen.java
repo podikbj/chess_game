@@ -1,5 +1,6 @@
 package cz.cvut.fel.pjv.chessgame;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -36,8 +37,8 @@ public class Queen extends Piece {
     }
 
     @Override
-    public boolean move(Tile finTile, Stack<String> tagType) {
-        boolean b = super.move(finTile, tagType);
+    public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
+        boolean b = super.move(finTile, tags, removedPieces);
         return b;
     }
 

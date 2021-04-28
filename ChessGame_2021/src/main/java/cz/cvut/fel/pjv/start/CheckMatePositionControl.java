@@ -6,6 +6,7 @@ import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.view.StartMenu;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -310,7 +311,7 @@ public class CheckMatePositionControl {
 
     }
 
-    public Tile doCastling(Tile finTile, Stack<String> tagType) {
+    public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
 
         Piece king = (whiteIsActive == true) ? wKing : bKing;
         setCurrentKingPosition(whiteIsActive);
@@ -320,22 +321,22 @@ public class CheckMatePositionControl {
         if (finTile.getX() == 9 && whiteIsActive) {
             finKingTile = tileList.stream()
                     .filter(p -> p.getX() == 10 && p.getY() == 0).findAny().get();
-            tagType.add("O-O");
+            tags.add("O-O");
         }
         if (finTile.getX() == 7 && whiteIsActive) {
             finKingTile = tileList.stream()
                     .filter(p -> p.getX() == 6 && p.getY() == 0).findAny().get();
-            tagType.add("O-O-O");
+            tags.add("O-O-O");
         }
         if (finTile.getX() == 7 && !whiteIsActive) {
             finKingTile = tileList.stream()
                     .filter(p -> p.getX() == 6 && p.getY() == 7).findAny().get();
-            tagType.add("O-O-O");
+            tags.add("O-O-O");
         }
         if (finTile.getX() == 9 && !whiteIsActive) {
             finKingTile = tileList.stream()
                     .filter(p -> p.getX() == 10 && p.getY() == 7).findAny().get();
-            tagType.add("O-O");
+            tags.add("O-O");
         }
         // reversed castling
         if ((finTile.getX() == 11 || finTile.getX() == 4) && whiteIsActive) {
@@ -343,25 +344,16 @@ public class CheckMatePositionControl {
                     .filter(p -> p.getX() == 8 && p.getY() == 0).findAny().get();
             //tagType.add("O-O");
         }
-//        if (finTile.getX() == 4 && whiteIsActive) {
-//            finKingTile = tileList.stream()
-//                    .filter(p -> p.getX() == 8 && p.getY() == 0).findAny().get();
-//            //tagType.add("O-O-O");
-//        }
+
         if ((finTile.getX() == 4 || finTile.getX() == 4) && !whiteIsActive) {
             finKingTile = tileList.stream()
                     .filter(p -> p.getX() == 8 && p.getY() == 7).findAny().get();
             //tagType.add("O-O-O");
         }
-//        if (finTile.getX() == 11 && !whiteIsActive) {
-//            finKingTile = tileList.stream()
-//                    .filter(p -> p.getX() == 10 && p.getY() == 7).findAny().get();
-            //tagType.add("O-O");
-//       }
 
         if (finKingTile != null) {
-            king.move(finKingTile, tagType);
-            if (tagType.equals("R")) {
+            king.move(finKingTile, tags,removedPieces);
+            if (tags.equals("R")) {
                 king.setWasMoved(false);
             }
         }

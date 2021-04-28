@@ -20,7 +20,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +45,7 @@ public class GameWindowGameView {
     private GameManager gameManager = GameManager.getInstance();
     private boolean whiteIsActive = true;
     private MovesIterator it = MovesIterator.getInstance();
-    private Stack<String> tagType;
+    private HashSet<String> tags = new HashSet<String>();
     private Piece currentPiece = null;
     private Tile tile = null;
     private LinkedList<Tile> tileList;
@@ -55,6 +57,7 @@ public class GameWindowGameView {
     private String lastNextTag = "";
     private String lastPreviouseTag = "";
     private int counter = 0;
+    private LinkedList<Piece> removedPieces = new LinkedList<Piece>();
 
     public GameWindowGameView(GameWindowBasic gameWindowBasic, BoardPanel bp) {
 
@@ -68,7 +71,7 @@ public class GameWindowGameView {
 
         this.boardPanel = bp;
 
-        this.tagType = boardPanel.getTagType();
+        this.tags = boardPanel.getTags();
         this.tileList = gameManager.getTileList();
         this.gameView = gameWindowBasic.getGameView();
 
@@ -198,19 +201,16 @@ public class GameWindowGameView {
 
         next.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                final int x = 1;
-                String element = null;
-                element = (element == lastPreviouseTag) ? it.getCurrentElement() : it.next(x);
-
-                if (element == null) {
-                    next.setEnabled(true);
+                if (it.getPos() == it.getSize() - 1) {
                     return;
                 }
+                final int x = 1;
+                it.next(x);
+                String element = it.getCurrentElement();
 
-                whiteIsActive = true;
-                whiteIsActive = (it.getPos() % 2 == 0) ? true : false;
-
+                whiteIsActive = (it.getPos() % 2 == 1) ? true : false;
+                int color = (whiteIsActive == true) ? 0 : 1;
+                
                 doNextTag(element);
                 whiteIsActive = !whiteIsActive;
                 boardPanel.repaint();
@@ -223,23 +223,16 @@ public class GameWindowGameView {
         previous.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                final int x = -1;
-                String element = null;
-                if (firstStep) {
-                    element = it.getCurrentElement();
-                    firstStep = false;
-                } else {
-                    element = (element == lastNextTag) ? it.getCurrentElement() : it.next(x);
-                }
-
-                if (element == null) {
-                    previous.setEnabled(true);
+                if (it.getPos() == 0) {
                     return;
                 }
+                final int x = -1;
+                String element = it.getCurrentElement();
 
-                whiteIsActive = (it.getPos() % 2 == 0) ? true : false;
+                whiteIsActive = (it.getPos() % 2 == 1) ? true : false;
                 int color = (whiteIsActive == true) ? 0 : 1;
 
+                it.next(x);
                 boolean wasKilled = element.contains("x");
 
                 String[] itemsSubLine = getSubTegs(element);
@@ -253,15 +246,20 @@ public class GameWindowGameView {
                 Tile finTilef1 = tile;
                 setCurrentTile(itemsSubLine[1]);
                 currentPiece = tile.getCurrentPiece();
-                gameManager.move(currentPiece, finTilef1, tagType);
+                gameManager.move(currentPiece, finTilef1, tags, removedPieces);
                 boardPanel.repaint();
                 if (wasKilled) {
 
                     final String f2Pawn = "P";
-                    final String f2 = itemsSubLine[1].substring(0, 1);
 
-                    final String f = (itemsSubLine[1].length() == 3) ? f2 : f2Pawn;
-
+                    String itemSub1 = itemsSubLine[1];
+                    if (itemSub1.contains("+")) {
+                        itemSub1 = itemSub1.replace("+", " ").trim();
+                    }
+                    final String f2 = itemSub1.substring(0, 1);
+                    //final String f2 = itemsSubLine[1].substring(0, 1);
+                    //final String f = (itemsSubLine[1].length() == 3) ? f2 : f2Pawn;
+                    final String f = Character.isUpperCase(f2.charAt(0)) ? f2 : f2Pawn;
                     Tile finTilef2 = tile;
                     tile = tileList.stream().filter(p -> p.getX() < 4)
                             .filter(p -> p.getCurrentPiece().getColor() == color)
@@ -269,7 +267,7 @@ public class GameWindowGameView {
                             .findFirst().get();
 
                     currentPiece = tile.getCurrentPiece();
-                    gameManager.move(currentPiece, finTilef2, tagType);
+                    gameManager.move(currentPiece, finTilef2, tags, removedPieces);
                     boardPanel.repaint();
                 }
                 lastPreviouseTag = element;
@@ -311,8 +309,11 @@ public class GameWindowGameView {
         chMap.put("f", 9);
         chMap.put("g", 10);
         chMap.put("h", 11);
-
-        return chMap.get(str);
+        if (chMap.containsKey(str)) {
+            return chMap.get(str);
+        } else {
+            return -1;
+        }
 
     }
 
@@ -336,7 +337,7 @@ public class GameWindowGameView {
         currentPiece = tile.getCurrentPiece();
         setCurrentTile(itemsSubLine[1]);
 
-        gameManager.move(currentPiece, tile, tagType);
+        gameManager.move(currentPiece, tile, tags, removedPieces);
 
         if (wasKilled) {
             boardPanel.addRemovedPiecesToLSP();
@@ -346,6 +347,9 @@ public class GameWindowGameView {
 
     private String[] getSubTegs(String tag) {
 
+        if (tag.contains("+")) {
+            tag = tag.replace("+", " ").trim();
+        }
         String[] itemsSubLine = null;
         boolean wasKilled = tag.contains("x");
         if (wasKilled) {
@@ -418,14 +422,14 @@ public class GameWindowGameView {
             setCurrentTile(finish[3]);
         }
         gameManager.getCheckMatePositionControl().setWhiteIsActive(whiteIsActive);
-        gameManager.move(currentPiece, tile, tagType);
+        gameManager.move(currentPiece, tile, tags, removedPieces);
 
         if (straight == false) {
             currentPiece.setWasMoved(false);
-            tagType.add("R");
+            tags.add("R");
         }
 
-        gameManager.doCastling(tile, tagType);
+        gameManager.doCastling(tile, tags, removedPieces);
     }
 //    
 //    public void swap(String[] start, String[] finish){

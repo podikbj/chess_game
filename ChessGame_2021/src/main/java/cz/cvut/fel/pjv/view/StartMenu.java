@@ -25,7 +25,7 @@ public class StartMenu implements Runnable {
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 GameWindowBasic gwb = new GameWindowBasic();
-                BoardPanel bp = new BoardPanel(gwb);
+                BoardPanel bp = new BoardPanel(gwb, mode);
                 gwb.createGameModes(bp, mode);
                 //new GameForm();
                 startWindow.dispose();
@@ -51,7 +51,7 @@ public class StartMenu implements Runnable {
         startWindow.add(buttons, BorderLayout.SOUTH);
 
         JPanel gameState = new JPanel();
-        buttons.setLayout(new GridLayout(1, 3, 10, 0));
+        gameState.setLayout(new GridLayout(1, 3, 10, 0));
 
         String[] gs = {GameStateEnum.GENERAL.name(), GameStateEnum.UPLOAD.name(),
             GameStateEnum.IIMODEL.name()};
@@ -74,7 +74,7 @@ public class StartMenu implements Runnable {
         });
 
         gameState.add(comboBox);
-        startWindow.add(gameState, BorderLayout.WEST);
+        startWindow.add(gameState, BorderLayout.NORTH);
 
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startWindow.setVisible(true);

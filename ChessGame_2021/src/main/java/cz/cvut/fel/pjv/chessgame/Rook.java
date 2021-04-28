@@ -1,5 +1,6 @@
 package cz.cvut.fel.pjv.chessgame;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -32,13 +33,13 @@ public class Rook extends Piece {
     }
 
     @Override
-    public boolean move(Tile finTile, Stack<String> tagType) {
-        boolean b = super.move(finTile, tagType);
+    public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
+        boolean b = super.move(finTile, tags, removedPieces);
         if (wasMoved = false && currentTile.getX() == 11) {
-            tagType.push("0-0");
+            tags.add("0-0");
         }
         if (wasMoved = false && currentTile.getX() == 4) {
-            tagType.push("0-0-0");
+            tags.add("0-0-0");
         }
         return b;
     }

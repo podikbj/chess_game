@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
@@ -39,6 +40,7 @@ public class GameManager {
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
     private CheckMatePositionControl checkMatePositionControl;
+    private Tile[] lastMove = {null, null};
 
     private LinkedList<Piece> pieces = new LinkedList<Piece>();
 
@@ -114,12 +116,12 @@ public class GameManager {
 
     }
 
-    public void move(Piece currentPiece, Tile finTile, Stack<String> tagType) {
-        currentPiece.move(finTile, tagType);
+    public void move(Piece currentPiece, Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
+        currentPiece.move(finTile, tags, removedPieces);
     }
     
-    public Tile doCastling(Tile finTile, Stack<String> tagType){
-        return checkMatePositionControl.doCastling(finTile, tagType);
+    public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces){
+        return checkMatePositionControl.doCastling(finTile, tags, removedPieces);
     }
 
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, int castling) {
@@ -287,8 +289,25 @@ public class GameManager {
         return removedPieceses;
     }
 
-//    public LinkedList<Tile> getLeftSideTileList() {
-//        return leftSideTileList;
-//    }
+public List<Tile> getAllowedTiles(Piece p) {
+    List<Tile> l = new ArrayList<Tile>();
+    boolean b = false;
+    for (Tile t : tileList){
+        b = isMoveAllowed(p,t, p.getCurrentTile(), 0);
+        if (b) {
+            l.add(t);
+        }
+    }
+    
+    return l;
+}
+
+    public Tile[] getLastMove() {
+        return lastMove;
+    }
+
+    public void addLastMove(Tile t, int ind) {
+        lastMove[ind] = t;
+    }
 
 }

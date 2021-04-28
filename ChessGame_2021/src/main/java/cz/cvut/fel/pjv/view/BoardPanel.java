@@ -14,10 +14,13 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.HashSet;
 //import java.time.Clock;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.Stack;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -31,25 +34,27 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private TileComponent currentTileComponent;
     private Piece currentPiece;
     private GameWindowBasic gameWindow;
+    private int computer = -1;
     private GameManager gameManager = GameManager.getInstance();
     private CheckMatePositionControl checkMatePositionControl;
     private LinkedList<Tile> tileList;
-    private List<Piece> removedPieces = null;
+    private LinkedList<Piece> removedPieces = new LinkedList<>();
+    private List<Piece> gmRemovedPieces;
+    private GameStateEnum mode = null;
+    //private Piece lastRemoved = null;
 
     private int xB = 0;
     private int yB = 0;
     private boolean whiteIsActive = true;
 
     private int counter = 0;
-    private int lineCounter = 0;
-    private Stack<String> tagType = new Stack<String>();
-    private Stack<String> tag = new Stack<String>();
-    private StringBuilder sb = new StringBuilder();
+    private HashSet<String> tags = new HashSet<String>();
 
-    public BoardPanel(GameWindowBasic gameWindow) {
+    public BoardPanel(GameWindowBasic gameWindow, GameStateEnum mode) {
 
         this.boardTileComponents = new TileComponent[8][12];
         this.gameWindow = gameWindow;
+        this.mode = mode;
         setLayout(new GridLayout(8, 12));
 
         this.addMouseListener(this);
@@ -98,18 +103,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseClicked(MouseEvent e) {
-//         this.tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-//          Tile currentTile = tc.getCurrentTile();
-//          currentTile.removePiece();
-        //   repaint();
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         xB = e.getX();
         yB = e.getY();
-        boolean initialMove = false;
+        //boolean initialMove = false;
 
         currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
         Tile currentTile = currentTileComponent.getCurrentTile();
@@ -125,12 +126,25 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 return;
             }
 
+            if (currentPiece.getColor() == 0 && computer == 0 && !whiteIsActive) {
+//                currentTileComponent.setDisplayPiece(false);
+//                repaint();
+                return;
+            }
+
+            if (currentPiece.getColor() == 1 && computer == 1 && whiteIsActive) {
+//                currentTileComponent.setDisplayPiece(false);
+//                repaint();
+                return;
+            }
+
             if (currentPiece.getColor() == 0 && whiteIsActive) {
                 return;
             }
             if (currentPiece.getColor() == 1 && !whiteIsActive) {
                 return;
             }
+
             currentTileComponent.setDisplayPiece(false);
         }
 
@@ -149,7 +163,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
             if (StartMenu.isManual) {
                 if (currentTile.getIsEmpty()) {
-                    gameManager.move(currentPiece, currentTile, tagType);
+                    gameManager.move(currentPiece, currentTile, tags, removedPieces);
                 }
                 repaint();
                 return;
@@ -177,10 +191,12 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
                 currentTileComponent.setDisplayPiece(true);
 
-                gameManager.move(currentPiece, currentTile, tagType);
+                gameManager.move(currentPiece, currentTile, tags, removedPieces);
+                gameManager.addLastMove(startTile, 0);
+                gameManager.addLastMove(currentTile, 1);
 
                 if (checkMatePositionControl.isItCheck(currentPiece)) {
-                    tagType.add("+");
+                    tags.add("+");
                 }
 
                 //if a pawn get oppisite border you are allowed to convert it to any piece exept king
@@ -223,135 +239,64 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
+//    
     private void setGameView(Piece currentPiece, Tile currentTile, Tile startTile) {
 
-        lineCounter++;
+        counter++;
 
-        StringBuilder sbGameView = new StringBuilder();
-        sbGameView.append(gameWindow.getGameView());
+        StringBuilder sb = new StringBuilder();
+       // StringBuilder lastMove = new StringBuilder();
+        sb.append(gameWindow.getGameView());
 
         if (whiteIsActive) {
-            counter++;
-            sb.append(String.valueOf(counter)).append(". ");
-            tag.add(sb.toString());
+            sb.append(String.valueOf((counter + 1) / 2)).append(". ");
         }
 
-        if (tagType.size() == 0) {
-            sb = new StringBuilder();
-            if (currentPiece.toString() == "P") {
-                sb.append(startTile.coordinatesString());
-            } else {
-                sb.append(currentPiece.toString()).append(startTile.coordinatesString());
-            }
+        if (currentPiece.toString() != "P") {
+            sb.append(currentPiece.toString());
+          //  lastMove.append(currentPiece.toString());
+        }
+        sb.append(startTile.coordinatesString());
+        if (tags.contains("x")) {
+            sb.append("x");
+         //   lastMove.append("x");
+        } else {
             sb.append("-");
-            sb.append(currentTile.coordinatesString()).append(" ");
-
-            if (lineCounter % 4 == 0 && !whiteIsActive) {
-                sb.append("\n");
-            }
-            tag.add(sb.toString());
-
-            sb = new StringBuilder();
-
-            tag.forEach(n -> sb.append(n));
-            tag.clear();
-            sbGameView.append(sb.toString());
-
-            gameWindow.setGameView(sbGameView.toString());
-            GameStateEnum gse = gameWindow.getGameState();
-            switch (gse) {
-                case GENERAL:
-                    gameWindow.getAuto().getTextArea().setText(gameWindow.getGameView());
-                    break;
-                case UPLOAD:
-                    gameWindow.getView().getTextArea().setText(gameWindow.getGameView());
-                    break;
-                case IIMODEL:
-                    gameWindow.getComp().getTextArea().setText(gameWindow.getGameView());
-                    break;
-            }
-
-            return;
+          //  lastMove.append("-");
         }
-        String str;
-        int size = tagType.size();
-        while (size > 0) {
-            size--;
-            str = tagType.pop();
-            switch (str) {
-                case ("x"): {
-                    sb = new StringBuilder();
-                    if (currentPiece.toString() == "P") {
-                        sb.append(startTile.coordinatesString());
-                    } else {
-                        sb.append(currentPiece.toString()).append(startTile.coordinatesString());
-                    }
 
-                    sb.append(str);
-                    removedPieces = gameManager.getRemovedPieces();
-                    if (removedPieces == null) {
-                        return;
-                    }
-                    String strP = removedPieces.get(removedPieces.size() - 1).toString();
-                    if (!strP.equals("P")) {
-                        sb.append(strP);
-                    }
-
-                    sb.append(currentTile.coordinatesString()).append(" ");
-                    break;
+        if (tags.contains("x")) {
+            // removedPieces = gameManager.getRemovedPieces();
+            if (removedPieces != null) {
+                String strP = removedPieces.get(removedPieces.size() - 1).toString();
+                if (!strP.equals("P")) {
+                    sb.append(strP);
+                 //   lastMove.append(strP);
                 }
-                case ("+"): {
-                    sb = new StringBuilder();
-                    if (currentPiece.toString() == "P") {
-                        sb.append(startTile.coordinatesString());
-                    } else {
-                        sb.append(currentPiece.toString()).append(startTile.coordinatesString());
-                    }
-                    sb.append("-");
-                    sb.append(currentTile.coordinatesString());
-                    sb.append(str).append(" ");
-                    break;
-                }
-                case ("#"): {
-                    sb = new StringBuilder();
-                    break;
-                }
-                case ("O-O"): {
-                    sb = new StringBuilder();
-                    sb.append(str).append(" ");
-                    break;
-                }
-                case ("O-O-O"): {
-                    sb = new StringBuilder();
-                    sb.append(str).append(" ");
-                    break;
-                }
-                case ("-"): {
-                    //sb = new StringBuilder();
-                    String t = tag.pop();
-                    t = t.replace("-", "x").trim();
-                    tag.add(t);
-                    //sb.append(t).append(" ");
-                    break;
-                }
-
-            }
-            tag.add(sb.toString());
-            if (lineCounter % 4 == 0 && !whiteIsActive) {
-                sb.append("\n");
             }
         }
 
-        sb = new StringBuilder();
+        sb.append(currentTile.coordinatesString());
 
-        tag.forEach(n -> sb.append(n));
-        tag.clear();
-        sbGameView.append(sb.toString());
+        if (tags.contains("#")) {
+            sb.append("#");
+          //  lastMove.append("#");
+        } else if (tags.contains("+")) {
+            sb.append("+");
+           // lastMove.append("+");
+        }
 
-        gameWindow.setGameView(sbGameView.toString());
+        sb.append(" ");
+        //lastMove.append(" ");
+        if (counter % 4 == 0) {
+            sb.append("\n");
+        }
+
+        //gameManager.setLastMove(lastMove.toString());
+        tags.clear();
+
         gameWindow.setGameView(sb.toString());
-        GameStateEnum gse = gameWindow.getGameState();
-        switch (gse) {
+        switch (gameWindow.getGameState()) {
             case GENERAL:
                 gameWindow.getAuto().getTextArea().setText(gameWindow.getGameView());
                 break;
@@ -362,20 +307,19 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 gameWindow.getComp().getTextArea().setText(gameWindow.getGameView());
                 break;
         }
-
     }
 
     public Tile addRemovedPiecesToLSP() {
         //int color = (whiteIsActive) ? 0 : 1;
-        removedPieces = gameManager.getRemovedPieces();
+        gmRemovedPieces = gameManager.getRemovedPieces();
 
         Piece remP = null;
         Tile t = null;
-        if (removedPieces == null) {
+        if (gmRemovedPieces == null) {
             return t;
         }
 
-        for (Piece p : removedPieces) {
+        for (Piece p : gmRemovedPieces) {
             if (p.getCurrentTile() == null) {
                 remP = p;
                 break;
@@ -428,7 +372,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     private void doCastling(Tile currentTile) {
         //System.out.println("castling3 :" + castling);
-        Tile finishKingTile = checkMatePositionControl.doCastling(currentTile, tagType);
+        Tile finishKingTile = checkMatePositionControl.doCastling(currentTile, tags, removedPieces);
         repaintTile(finishKingTile);
     }
 
@@ -446,25 +390,58 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         return currentPiece;
     }
 
-    public Stack<String> getTagType() {
-        return tagType;
+    public HashSet<String> getTags() {
+        return tags;
     }
 
     //Computer's game
-    public void doTah() {
-        while (true) {
+    public void doTah(int computer) {
 
-            Random random = new Random();
-            int s = 0;
-            //int f = pieces.stream().filter(p -> !p.wasRemoved);
-//            int x = s + random.nextInt(f - s + 1);
-//            if (gameManager.isMoveAllowed(currentPiece, finTile, startTile, whiteIsActive, ALLBITS)){
-//                currentPiece.move(finTile, tagType);
-//                this.repaint();
-//                whiteIsActive = !whiteIsActive;
-//                break;
-//            }
+        if (computer == 1 && !whiteIsActive) {
+            return;
         }
+        if (computer == 0 && whiteIsActive) {
+            return;
+        }
+        List<Piece> pieces = gameManager.getPieces(computer);
+        List<Tile> tlist = null;
+        Tile startTile = null;
+        Tile finTile = null;
+
+        Random random = new Random();
+        int s, f, x;
+
+        checkMatePositionControl.setWhiteIsActive(whiteIsActive);
+        while (true) {
+            s = 0;
+            f = pieces.size() - 1;
+            x = s + random.nextInt(f - s + 1);
+            currentPiece = pieces.get(x);
+            startTile = currentPiece.getCurrentTile();
+            tlist = gameManager.getAllowedTiles(currentPiece);
+            if (tileList != null && tileList.size() > 0) {
+                break;
+            }
+
+        }
+
+        s = 0;
+        f = tlist.size() - 1;
+        x = s + random.nextInt(f - s + 1);
+
+        finTile = tlist.get(x);
+
+        gameManager.move(currentPiece, finTile, tags, removedPieces);
+        if (checkMatePositionControl.isItCheck(currentPiece)) {
+            tags.add("+");
+        }
+        setGameView(currentPiece, finTile, startTile);
+        whiteIsActive = !whiteIsActive;
+        this.repaint();
+    }
+
+    public void setComputer(int computer) {
+        this.computer = computer;
     }
 
 }

@@ -14,11 +14,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -41,7 +45,7 @@ public class GameWindowGameAuto {
     private ChessTimer bChessTimer;
 
     private boolean whiteIsActive = true;
-    private Stack<String> tagType;
+    private HashSet<String> tags = new HashSet<String>();
 
     private JTextArea textArea = new JTextArea();
     private GameManager gameManager = GameManager.getInstance();
@@ -60,7 +64,7 @@ public class GameWindowGameAuto {
 
         this.boardPanel = bp;
 
-        this.tagType = boardPanel.getTagType();
+        this.tags = boardPanel.getTags();
         this.tileList = gameManager.getTileList();
         this.gameView = gameWindowBasic.getGameView();
 
@@ -104,10 +108,18 @@ public class GameWindowGameAuto {
 //                        + wPlayer
 //                        + bPlayer
 //                        + ".pgn";
-                final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
+                File myFilePGN = null;
 
-                File myFilePGN = new File(pathPGN);
+                final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
+                //final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(pathPGN));
+                int result = fileChooser.showOpenDialog(gameWindowFrame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    myFilePGN = fileChooser.getSelectedFile();
+                }
 
+                //File myFilePGN = new File(pathPGN);
                 try {
                     FileWriter writer = new FileWriter(myFilePGN, true);
                     BufferedWriter bw = new BufferedWriter(writer);
@@ -175,7 +187,7 @@ public class GameWindowGameAuto {
 
         textPanel.add(textArea);
         //textPanel.add(scrollBar);
-        textPanel.setPreferredSize(new Dimension(300, 400));
+        textPanel.setPreferredSize(new Dimension(250, 400));
         return textPanel;
     }
 

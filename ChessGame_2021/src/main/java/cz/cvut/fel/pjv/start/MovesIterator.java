@@ -8,10 +8,12 @@ public class MovesIterator {
 
     private static MovesIterator instance = null;
     private LinkedList<String> moves = new LinkedList<>();
-    private int pos = -1;
-    private int size = 0;
+    private int pos = 0;
+ //   private int size = 0;
 
     private MovesIterator() {
+        
+        moves.add("");
         //  this.moves = moves;
     }
 
@@ -60,9 +62,9 @@ public class MovesIterator {
         return str;
     }
 
-    public void setPos(int pos) {
-        this.pos = pos;
-    }
+//    public void setPos(int pos) {
+//        this.pos = pos;
+//    }
 
     public void addMovement(String movement) {
         moves.add(movement);
