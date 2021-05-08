@@ -64,7 +64,7 @@ public class TileComponent extends JComponent {
                 g.setColor(new Color(101, 67, 33));
             }
         } else {
-            g.setColor(new Color(200, 200, 200));
+            g.setColor(new Color(240, 240, 240));
         }
 
         g.fillRect(this.getX(), this.getY(), this.getWidth(), this.getHeight());

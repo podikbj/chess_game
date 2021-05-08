@@ -1,22 +1,81 @@
 package cz.cvut.fel.pjv.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 public class StartMenu implements Runnable {
 
     public static boolean isManual = false;
-    private GameStateEnum mode = GameStateEnum.GENERAL;
+    private GameStateEnum gameState = GameStateEnum.LOAD_GAME;
 
     public void run() {
+
         final JFrame startWindow = new JFrame("Chess");
+        startWindow.setLocation(300, 100);
+        startWindow.setResizable(false);
+        startWindow.setSize(260, 240);
+
+        Box components = Box.createVerticalBox();
+        startWindow.add(components);
+
+        final JPanel titlePanel = new JPanel();
+        components.add(titlePanel);
+        final JLabel titleLabel = new JLabel("Chess");
+        titlePanel.add(titleLabel);
+
+        final JPanel blackPanel = new JPanel();
+        components.add(blackPanel, BorderLayout.EAST);
+        final JLabel blackPiece = new JLabel();
+        final JTextField blackInput = new JTextField("Black", 10);
+        blackPanel.add(blackInput);
+
+        final JPanel whitePanel = new JPanel();
+        components.add(whitePanel);
+        final JLabel whitePiece = new JLabel();
+        final JTextField whiteInput = new JTextField("White", 10);
+        whitePanel.add(whiteInput);
+
+        final String[] minSecInts = new String[60];
+        for (int i = 0; i < 60; i++) {
+            if (i < 10) {
+                minSecInts[i] = "0" + Integer.toString(i);
+            } else {
+                minSecInts[i] = Integer.toString(i);
+            }
+        }
+
+        final JComboBox<String> seconds = new JComboBox<String>(minSecInts);
+        final JComboBox<String> minutes = new JComboBox<String>(minSecInts);
+        final JComboBox<String> hours
+                = new JComboBox<String>(new String[]{"0", "1", "2", "3"});
+
+        Box timerSettings = Box.createHorizontalBox();
+
+        hours.setMaximumSize(hours.getPreferredSize());
+        minutes.setMaximumSize(minutes.getPreferredSize());
+        seconds.setMaximumSize(minutes.getPreferredSize());
+
+        timerSettings.add(hours);
+        timerSettings.add(Box.createHorizontalStrut(10));
+        timerSettings.add(seconds);
+        timerSettings.add(Box.createHorizontalStrut(10));
+        timerSettings.add(minutes);
+
+        timerSettings.add(Box.createVerticalGlue());
+
+        components.add(timerSettings);
 
         JPanel buttons = new JPanel();
         buttons.setLayout(new GridLayout(1, 3, 10, 0));
@@ -24,9 +83,12 @@ public class StartMenu implements Runnable {
 
         start.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                GameWindowBasic gwb = new GameWindowBasic();
-                BoardPanel bp = new BoardPanel(gwb, mode);
-                gwb.createGameModes(bp, mode);
+                int hh = Integer.parseInt((String) hours.getSelectedItem());
+                int mm = Integer.parseInt((String) minutes.getSelectedItem());
+                int ss = Integer.parseInt((String) seconds.getSelectedItem());
+                GameWindowBasic gwb = new GameWindowBasic(hh, mm, ss, gameState);
+                BoardPanel bp = new BoardPanel(gwb, gameState);
+                gwb.createGameModes(bp);
                 //new GameForm();
                 startWindow.dispose();
             }
@@ -47,34 +109,41 @@ public class StartMenu implements Runnable {
         });
 
         buttons.add(start);
+        buttons.add(Box.createHorizontalStrut(10));
         buttons.add(quit);
-        startWindow.add(buttons, BorderLayout.SOUTH);
 
-        JPanel gameState = new JPanel();
-        gameState.setLayout(new GridLayout(1, 3, 10, 0));
+        JPanel gameStatePanel = new JPanel();
+        gameStatePanel.setLayout(new GridLayout(1, 3, 10, 0));
 
-        String[] gs = {GameStateEnum.GENERAL.name(), GameStateEnum.UPLOAD.name(),
-            GameStateEnum.IIMODEL.name()};
+        String[] gs = {"Play game mode", "View game mode",
+            "Play game after loading mode", "Play game with PC mode"};
         final JComboBox comboBox = new JComboBox(gs);
 
         comboBox.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JComboBox box = (JComboBox) e.getSource();
                 String strMode = (String) box.getSelectedItem();
-                if (strMode.equals("UPLOAD")) {
-                    mode = GameStateEnum.UPLOAD;
+                if (strMode.equals("View game mode")) {
+                    gameState = GameStateEnum.LOAD_VIEW;
                 }
-                if (strMode.equals("IIMODEL")) {
-                    mode = GameStateEnum.IIMODEL;
+                if (strMode.equals("Play game after loading mode")) {
+                    gameState = GameStateEnum.LOAD_GAME;
                 }
-                if (strMode.equals("GENERAL")) {
-                    mode = GameStateEnum.GENERAL;
+                if (strMode.equals("Play game with PC mode")) {
+                    gameState = GameStateEnum.AI_MODEL;
+                }
+                if (strMode.equals("Play game mode")) {
+                    gameState = GameStateEnum.GENERAL;
                 }
             }
         });
 
-        gameState.add(comboBox);
-        startWindow.add(gameState, BorderLayout.NORTH);
+        gameStatePanel.add(comboBox);
+        components.add(gameStatePanel);
+        components.add(buttons);
+
+        Component space = Box.createGlue();
+        components.add(space);
 
         startWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         startWindow.setVisible(true);

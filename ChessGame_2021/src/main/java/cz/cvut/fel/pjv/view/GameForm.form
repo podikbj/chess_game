@@ -46,22 +46,24 @@
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Component id="blackPlayerName" min="-2" pref="153" max="-2" attributes="0"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="blackPlayerLastName" pref="153" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jgameDate" min="-2" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Component id="blackPlayerName" min="-2" pref="153" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="blackPlayerLastName" pref="153" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Component id="city" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="country" alignment="0" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="whitePlayerName" min="-2" pref="153" max="-2" attributes="0"/>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Component id="whitePlayerLastName" max="32767" attributes="0"/>
+                                  </Group>
+                                  <Component id="cupsName" max="32767" attributes="0"/>
+                                  <Component id="round" max="32767" attributes="0"/>
                               </Group>
-                              <Component id="city" alignment="0" max="32767" attributes="0"/>
-                              <Component id="country" alignment="0" max="32767" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Component id="whitePlayerName" min="-2" pref="153" max="-2" attributes="0"/>
-                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                  <Component id="whitePlayerLastName" max="32767" attributes="0"/>
-                              </Group>
-                              <Component id="cupsName" max="32767" attributes="0"/>
-                              <Component id="round" max="32767" attributes="0"/>
-                              <Component id="jgameDate" alignment="0" min="-2" pref="119" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -78,9 +80,9 @@
                   <Component id="city" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Component id="country" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
-                  <Component id="jgameDate" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
+                  <Component id="jgameDate" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
                   <Component id="round" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">

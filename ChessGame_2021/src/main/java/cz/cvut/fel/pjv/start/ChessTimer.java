@@ -1,40 +1,50 @@
 package cz.cvut.fel.pjv.start;
 
 import cz.cvut.fel.pjv.view.BoardPanel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 
-public class ChessTimer extends Thread {
+public class ChessTimer implements Runnable {
 
-    BoardPanel boardPanel;
-    boolean colorThread;
-    Clock clock;
-    JLabel wbTime;
+    private BoardPanel boardPanel;
+    private Clock clock;
+    private JLabel wbTime;
+    private static Logger logger = Logger.getLogger(ChessTimer.class.getName());
 
-    public ChessTimer(BoardPanel boardPanel, boolean colorThread, Clock clock, JLabel wbTime) {
+    public ChessTimer(BoardPanel boardPanel, Clock clock, JLabel wbTime) {
+
         this.boardPanel = boardPanel;
-        this.colorThread = colorThread;
         this.clock = clock;
         this.wbTime = wbTime;
+
     }
 
     @Override
-//    public void run() {
-     public synchronized void run() {
-        super.run();
+    public void run() {
+
         while (!clock.outOfTime()) {
-            if (colorThread == boardPanel.isWhiteIsActive()) {
+            if (Thread.currentThread().getName().equals("White") && boardPanel.isWhiteIsActive()) {
                 clock.decrementClock();
                 wbTime.setText(clock.getTime());
-                //System.out.println("colorThread: " + colorThread);
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (Thread.currentThread().getName().equals("Black") && !boardPanel.isWhiteIsActive()) {
+                clock.decrementClock();
+                wbTime.setText(clock.getTime());
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    logger.log(Level.SEVERE, null, ex);
 
                 }
-            } else {
-                //int a = 2;
-                //System.out.println("colorThread: " + colorThread + "; " + "boardPanel.isWhiteIsActive(): " + boardPanel.isWhiteIsActive());
             }
+
         }
     }
 }

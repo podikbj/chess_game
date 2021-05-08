@@ -2,13 +2,12 @@ package cz.cvut.fel.pjv.view;
 
 import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
-import cz.cvut.fel.pjv.start.Clock;
+import cz.cvut.fel.pjv.start.CheckMatePositionControl;
 import cz.cvut.fel.pjv.start.GameManager;
 import cz.cvut.fel.pjv.start.MovesIterator;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -18,52 +17,49 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 public class GameWindowGameView {
 
-    private JFrame gameWindowFrame;
-    private GameWindowBasic gameWindowBasic;
-    private BoardPanel boardPanel;
-    private GameManager gameManager = GameManager.getInstance();
+    private final JFrame gameWindowFrame;
+    private final GameWindowBasic gameWindowBasic;
+    private final BoardPanel boardPanel;
+    private final GameManager gameManager = GameManager.getInstance();
     private boolean whiteIsActive = true;
-    private MovesIterator it = MovesIterator.getInstance();
+    private final MovesIterator it = MovesIterator.getInstance();
     private HashSet<String> tags = new HashSet<String>();
     private Piece currentPiece = null;
     private Tile tile = null;
-    private LinkedList<Tile> tileList;
-    private static Logger logger = Logger.getLogger(GameForm.class.getName());
+    private final LinkedList<Tile> tileList;
+    private final static Logger logger = Logger.getLogger(GameForm.class.getName());
     private String gameView = "";
     private JTextArea textArea = new JTextArea();
     private StringBuilder sb = new StringBuilder();
-    private boolean firstStep = true;
-    private String lastNextTag = "";
-    private String lastPreviouseTag = "";
-    private int counter = 0;
+    //private boolean firstStep = true;
+    private final JMenu fileMenu = new JMenu("File");
+    private int tryCounter = 0;
     private LinkedList<Piece> removedPieces = new LinkedList<Piece>();
+    private GameStateEnum gameState;
 
-    public GameWindowGameView(GameWindowBasic gameWindowBasic, BoardPanel bp) {
+    public GameWindowGameView(GameWindowBasic gameWindowBasic, BoardPanel bp, GameStateEnum gameState) {
 
         this.gameWindowBasic = gameWindowBasic;
 
-        this.gameWindowFrame = new JFrame("Chess upload");
+        this.gameWindowFrame = new JFrame("Chess load");
         gameWindowFrame.setLocation(100, 100);
         final JMenuBar menuBar = createMenuBar();
 
@@ -74,6 +70,7 @@ public class GameWindowGameView {
         this.tags = boardPanel.getTags();
         this.tileList = gameManager.getTileList();
         this.gameView = gameWindowBasic.getGameView();
+        this.gameState = gameState;
 
         JPanel textPanel = textJPanel();
         textPanel.setSize(textPanel.getPreferredSize());
@@ -93,18 +90,51 @@ public class GameWindowGameView {
 
     private JMenuBar createMenuBar() {
         final JMenuBar menuBar = new JMenuBar();
-        menuBar.add(createFileMenuUploadFromPGN());
+        menuBar.add(createFileMenuLoadFromPGNForView());
+        menuBar.add(createFileMenuLoadFromPGNForGame());
+        menuBar.add(createFileMenuSaveToPGN());
         return menuBar;
     }
 
-    private JMenu createFileMenuUploadFromPGN() {
-        final JMenu fileMenu = new JMenu("File");
-        final JMenuItem openPNG = new JMenuItem("Upload game");
+    private JMenu createFileMenuLoadFromPGNForView() {
+
+        final JMenuItem openPNG = new JMenuItem("View game mode");
         openPNG.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (gameState == GameStateEnum.LOAD_GAME) {
+                    JOptionPane.showMessageDialog(openPNG, "Only for view game mode");
+                    return;
+                }
+                gameWindowFrame.setTitle("View game mode");
+                loadGameFromFile();
+            }
+        });
+        fileMenu.add(openPNG);
+        return fileMenu;
+    }
 
-//                Players players = Players.getInstance();
+    private JMenu createFileMenuLoadFromPGNForGame() {
+        final JMenuItem openPNG = new JMenuItem("Play game after loading mode");
+        openPNG.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gameState == GameStateEnum.LOAD_VIEW) {
+                    JOptionPane.showMessageDialog(openPNG, "Only for play game mode");
+                    return;
+                }
+                gameWindowFrame.setTitle("Play game mode");
+                loadGameFromFile();
+                boardPanel.setWhiteIsActive(whiteIsActive);
+                tags.clear();
+            }
+        });
+        fileMenu.add(openPNG);
+        return fileMenu;
+    }
+
+    private void loadGameFromFile() {
+        //                Players players = Players.getInstance();
 //                String gameDate = players.getDate();
 //                String wPlayer = players.getWpLastName();
 //                String bPlayer = players.getBpLastName();
@@ -114,67 +144,93 @@ public class GameWindowGameView {
 //                        + wPlayer
 //                        + bPlayer
 //                        + ".pgn";
-                counter++;
-                if (counter > 1) {
-                    JOptionPane.showMessageDialog(gameWindowFrame, "To start new game press New game button");
-                    return;
+        tryCounter++;
+        if (tryCounter > 1) {
+            JOptionPane.showMessageDialog(gameWindowFrame, "To start new game press New game button");
+            return;
+        }
+
+        final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
+
+        File myFilePGN = new File(pathPGN);
+        int counterTitle = 0;
+        int counter = 0;
+        try (
+                BufferedReader br = new BufferedReader(new FileReader(myFilePGN));) {
+
+            sb.append(gameView);
+            while (true) {
+                String line = br.readLine();
+                if (line == null) {
+                    break;
+                }
+                if (counterTitle < 7) {
+                    counterTitle++;
+                    continue;
                 }
 
-                final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
-                LinkedList<String> moves = new LinkedList<>();
+                sb.append(line).append("\n");
 
-                File myFilePGN = new File(pathPGN);
-                int counter = 0;
-                try (
-                        BufferedReader br = new BufferedReader(new FileReader(myFilePGN));) {
+                String[] itemsLine = line.split(" ");
 
-                    String itemLine = "";
-
-                    String itemSubLine1 = "";
-                    String itemSubLine2 = "";
-                    sb.append(gameView);
-                    while (true) {
-                        String line = br.readLine();
-                        if (line == null) {
-                            break;
-                        }
-                        if (counter < 7) {
-                            counter++;
-                            continue;
-                        }
-                        counter++;
-                        sb.append(line).append("\n");
-
-                        boolean wasKilled = false;
-                        String[] itemsLine = line.split(" ");
-
-                        for (int i = 0; i < itemsLine.length; i++) {
-                            if (i % 3 == 0) {
-                                whiteIsActive = true;
-                                continue;
-                            }
-
-                            it.addMovement(itemsLine[i]);
-                            doNextTag(itemsLine[i]);
-                            whiteIsActive = false;
-                            boardPanel.repaint();
-                        }
-                        gameView = sb.toString();
-
+                for (int i = 0; i < itemsLine.length; i++) {
+                    counter++;
+                    if (i % 3 == 0) {
+                        whiteIsActive = true;
+                        counter--;
+                        continue;
                     }
 
-                    br.close();
-
-                } catch (IOException ex) {
-                    logger.log(Level.SEVERE, "Error occur in uploading Game", ex);
+                    it.addMovement(itemsLine[i]);
+                    doNextTag(itemsLine[i]);
+                    whiteIsActive = !whiteIsActive;
+                    boardPanel.setWhiteIsActive(whiteIsActive);
+                    boardPanel.repaint();
                 }
-                textArea.setText(gameView);
+                gameView = sb.toString();
             }
-
+            br.close();
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Error occur in loading Game", ex);
         }
-        );
+        //System.out.println("counter: " + counter);
+        boardPanel.setCounter(counter);
+        textArea.setText(gameView);
+        gameWindowBasic.setGameView(gameView);
+    }
 
-        fileMenu.add(openPNG);
+    private JMenu createFileMenuSaveToPGN() {
+        final JMenuItem savePNG = new JMenuItem("Save as PGN");
+        savePNG.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gameState == GameStateEnum.LOAD_VIEW) {
+                    JOptionPane.showMessageDialog(savePNG, "Only for play game mode");
+                    return;
+                }
+                File myFilePGN = null;
+
+                final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(pathPGN));
+                int result = fileChooser.showOpenDialog(gameWindowFrame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    myFilePGN = fileChooser.getSelectedFile();
+                }
+
+                try {
+                    FileWriter writer = new FileWriter(myFilePGN, true);
+                    BufferedWriter bw = new BufferedWriter(writer);
+                    gameView = gameWindowBasic.getGameView();
+                    bw.write(gameView);
+                    bw.close();
+                } catch (IOException ex) {
+                    logger.log(Level.SEVERE, "Error occur in saving Game Report", ex);
+                    ex.printStackTrace();
+                }
+            }
+        });
+        fileMenu.add(savePNG);
         return fileMenu;
     }
 
@@ -183,8 +239,9 @@ public class GameWindowGameView {
         buttons.setLayout(new GridLayout(1, 3, 10, 0));
 
         final JButton quit = new JButton("Quit");
-
         quit.addActionListener(new ActionListener() {
+
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
@@ -198,9 +255,14 @@ public class GameWindowGameView {
         });
 
         final JButton next = new JButton("Next");
-
         next.addActionListener(new ActionListener() {
+
+            @Override
             public void actionPerformed(ActionEvent e) {
+                if (gameState == GameStateEnum.LOAD_GAME) {
+                    JOptionPane.showMessageDialog(next, "Only for view game mode");
+                    return;
+                }
                 if (it.getPos() == it.getSize() - 1) {
                     return;
                 }
@@ -210,19 +272,22 @@ public class GameWindowGameView {
 
                 whiteIsActive = (it.getPos() % 2 == 1) ? true : false;
                 int color = (whiteIsActive == true) ? 0 : 1;
-                
+
                 doNextTag(element);
                 whiteIsActive = !whiteIsActive;
                 boardPanel.repaint();
-                lastNextTag = element;
             }
         });
 
         final JButton previous = new JButton("Previous");
-
         previous.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (gameState == GameStateEnum.LOAD_GAME) {
+                    JOptionPane.showMessageDialog(previous, "Only for view game mode");
+                    return;
+                }
                 if (it.getPos() == 0) {
                     return;
                 }
@@ -247,6 +312,10 @@ public class GameWindowGameView {
                 setCurrentTile(itemsSubLine[1]);
                 currentPiece = tile.getCurrentPiece();
                 gameManager.move(currentPiece, finTilef1, tags, removedPieces);
+
+                gameManager.addLastMove(tile, 0);
+                gameManager.addLastMove(finTilef1, 1);
+
                 boardPanel.repaint();
                 if (wasKilled) {
 
@@ -256,9 +325,10 @@ public class GameWindowGameView {
                     if (itemSub1.contains("+")) {
                         itemSub1 = itemSub1.replace("+", " ").trim();
                     }
+                    if (itemSub1.contains("#")) {
+                        itemSub1 = itemSub1.replace("#", " ").trim();
+                    }
                     final String f2 = itemSub1.substring(0, 1);
-                    //final String f2 = itemsSubLine[1].substring(0, 1);
-                    //final String f = (itemsSubLine[1].length() == 3) ? f2 : f2Pawn;
                     final String f = Character.isUpperCase(f2.charAt(0)) ? f2 : f2Pawn;
                     Tile finTilef2 = tile;
                     tile = tileList.stream().filter(p -> p.getX() < 4)
@@ -268,18 +338,21 @@ public class GameWindowGameView {
 
                     currentPiece = tile.getCurrentPiece();
                     gameManager.move(currentPiece, finTilef2, tags, removedPieces);
+                    gameManager.addLastMove(tile, 0);
+                    gameManager.addLastMove(finTilef2, 1);
+
                     boardPanel.repaint();
                 }
-                lastPreviouseTag = element;
             }
         });
 
         final JButton nGame = new JButton("New game");
         nGame.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to upload a new game?",
+                        "Are you sure you want to load a new game?",
                         "Confirm new game", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -322,7 +395,12 @@ public class GameWindowGameView {
         if (tag.contains("+")) {
             tag = tag.replace("+", " ").trim();
         }
+        if (tag.contains("#")) {
+            tag = tag.replace("#", " ").trim();
+        }
+
         boolean wasKilled = tag.contains("x");
+
         String[] itemsSubLine = getSubTegs(tag);
         if (itemsSubLine == null) {
             return;
@@ -335,9 +413,36 @@ public class GameWindowGameView {
 
         setCurrentTile(itemsSubLine[0]);
         currentPiece = tile.getCurrentPiece();
+        gameManager.addLastMove(tile, 0);
+
         setCurrentTile(itemsSubLine[1]);
 
+        tags.clear();
         gameManager.move(currentPiece, tile, tags, removedPieces);
+        CheckMatePositionControl checkMatePositionControl = gameManager.getCheckMatePositionControl();
+        checkMatePositionControl.setWhiteIsActive(whiteIsActive);
+        if (checkMatePositionControl.isItCheck()
+                && checkMatePositionControl.canEscapeCheck()) {
+
+            tags.add("+");
+        } 
+//        else {
+//            if (whiteIsActive) {
+//                winer = "1 - 0";
+//            } else {
+//                winer = "0 - 1";
+//            }
+//            tags.add("#");
+//            setGameView(currentPiece, currentTile, startTile);
+//            currentPiece = null;
+//            repaint();
+//            this.removeMouseListener(this);
+//            this.removeMouseMotionListener(this);
+//            gameWindowBasic.endGame(winer);
+//            return;
+//            //repaint();
+//        }
+        gameManager.addLastMove(tile, 1);
 
         if (wasKilled) {
             boardPanel.addRemovedPiecesToLSP();
@@ -349,6 +454,9 @@ public class GameWindowGameView {
 
         if (tag.contains("+")) {
             tag = tag.replace("+", " ").trim();
+        }
+        if (tag.contains("#")) {
+            tag = tag.replace("#", " ").trim();
         }
         String[] itemsSubLine = null;
         boolean wasKilled = tag.contains("x");
@@ -389,41 +497,35 @@ public class GameWindowGameView {
         }
 
         if (whiteIsActive && itemsSubLine.length == 2) {
-            //setCurrentTile("h1");
             setCurrentTile(start[0]);
         }
         if (whiteIsActive && itemsSubLine.length == 3) {
-            //setCurrentTile("a1");
             setCurrentTile(start[1]);
         }
         if (!whiteIsActive && itemsSubLine.length == 2) {
-            //setCurrentTile("h8");
             setCurrentTile(start[2]);
         }
         if (!whiteIsActive && itemsSubLine.length == 3) {
-            //setCurrentTile("a8");
             setCurrentTile(start[3]);
         }
         currentPiece = tile.getCurrentPiece();
         if (whiteIsActive && itemsSubLine.length == 2) {
-            //setCurrentTile("f1");
             setCurrentTile(finish[0]);
         }
         if (whiteIsActive && itemsSubLine.length == 3) {
-            //setCurrentTile("d1");
             setCurrentTile(finish[1]);
         }
         if (!whiteIsActive && itemsSubLine.length == 2) {
-            //setCurrentTile("f8");
             setCurrentTile(finish[2]);
         }
         if (!whiteIsActive && itemsSubLine.length == 3) {
-            //setCurrentTile("d8");
             setCurrentTile(finish[3]);
         }
         gameManager.getCheckMatePositionControl().setWhiteIsActive(whiteIsActive);
         gameManager.move(currentPiece, tile, tags, removedPieces);
 
+//        gameManager.addLastMove(startTile, 0);
+//        gameManager.addLastMove(tile, 1);
         if (straight == false) {
             currentPiece.setWasMoved(false);
             tags.add("R");
@@ -431,22 +533,16 @@ public class GameWindowGameView {
 
         gameManager.doCastling(tile, tags, removedPieces);
     }
-//    
-//    public void swap(String[] start, String[] finish){
-//        String[] temp = Arrays.copyOf(start, start.length);
-//        start = Arrays.copyOf(finish, finish.length);
-//        finish = Arrays.copyOf(temp, temp.length);     
-//    }
 
     private JPanel textJPanel() {
         JPanel textPanel = new JPanel();
 
         textArea.setEditable(false);
-        JScrollBar scrollBar = new JScrollBar();
+        //JScrollBar scrollBar = new JScrollBar();
 
         textPanel.add(textArea);
         //textPanel.add(scrollBar);
-        textPanel.setPreferredSize(new Dimension(200, 400));
+        textPanel.setPreferredSize(new Dimension(250, 400));
         return textPanel;
     }
 
@@ -458,4 +554,25 @@ public class GameWindowGameView {
         this.gameView = gameView;
     }
 
+    public void endGame(String winner) {
+        if (winner.equals("1 - 0")) {
+//            if (timer != null) {
+//                timer.stop();
+//            }
+            int n = JOptionPane.showConfirmDialog(
+                    gameWindowFrame,
+                    "White wins by checkmate!",
+                    "White wins!", JOptionPane.DEFAULT_OPTION);
+
+        } else {
+//            if (timer != null) {
+//                timer.stop();
+//            }
+            int n = JOptionPane.showConfirmDialog(
+                    gameWindowFrame,
+                    "Black wins by checkmate!",
+                    "Black wins!", JOptionPane.DEFAULT_OPTION);
+
+        }
+    }
 }

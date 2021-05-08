@@ -7,9 +7,10 @@ import cz.cvut.fel.pjv.start.GameManager;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-//import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -39,10 +41,11 @@ public class GameWindowGameAuto {
     private JFrame gameWindowFrame;
     private BoardPanel boardPanel;
 
-    public Clock blackClock;
-    public Clock whiteClock;
-    private ChessTimer wChessTimer;
-    private ChessTimer bChessTimer;
+    public Clock blackClock = null;
+    public Clock whiteClock = null;
+
+    private Thread wThread = null;
+    private Thread bThread = null;
 
     private boolean whiteIsActive = true;
     private HashSet<String> tags = new HashSet<String>();
@@ -50,9 +53,14 @@ public class GameWindowGameAuto {
     private JTextArea textArea = new JTextArea();
     private GameManager gameManager = GameManager.getInstance();
     private LinkedList<Tile> tileList;
-    private static Logger logger = Logger.getLogger(GameForm.class.getName());
+    private static Logger logger = Logger.getLogger(GameWindowGameAuto.class.getName());
     private String gameView = "";
 
+    private int hh = 0;
+    private int mm = 0;
+    private int ss = 0;
+
+    //private GameStateEnum gameState;
     public GameWindowGameAuto(GameWindowBasic gameWindowBasic, BoardPanel bp) {
         this.gameWindowBasic = gameWindowBasic;
 
@@ -68,21 +76,37 @@ public class GameWindowGameAuto {
         this.tileList = gameManager.getTileList();
         this.gameView = gameWindowBasic.getGameView();
 
-        blackClock = new Clock(60, 0, 0);
-        whiteClock = new Clock(60, 0, 0);
+        hh = gameWindowBasic.getHH();
+        mm = gameWindowBasic.getMM();
+        ss = gameWindowBasic.getSS();
+
+        blackClock = new Clock(hh, mm, ss);
+        whiteClock = new Clock(hh, mm, ss);
+
+        JPanel clockPanel = clockJPanel();
+
+        clockPanel.setSize(clockPanel.getPreferredSize());
+        gameWindowFrame.add(clockPanel, BorderLayout.NORTH);
 
         JPanel textPanel = textJPanel();
+
         textPanel.setSize(textPanel.getPreferredSize());
         gameWindowFrame.add(textPanel, BorderLayout.EAST);
+
         gameWindowFrame.add(boardPanel, BorderLayout.CENTER);
 
         gameWindowFrame.add(buttons(), BorderLayout.SOUTH);
         gameWindowFrame.setSize(gameWindowFrame.getPreferredSize());
-        gameWindowFrame.setSize(new Dimension(600, 600));
-        gameWindowFrame.setResizable(false);
+        gameWindowFrame.setSize(
+                new Dimension(600, 600));
+        gameWindowFrame.setResizable(
+                false);
         gameWindowFrame.pack();
-        gameWindowFrame.setVisible(true);
-        gameWindowFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        gameWindowFrame.setVisible(
+                true);
+
+        gameWindowFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     private JMenuBar createMenuBar() {
@@ -97,17 +121,6 @@ public class GameWindowGameAuto {
         savePNG.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-//                Players players = Players.getInstance();
-//                String gameDate = players.getDate();
-//                String wPlayer = players.getWpLastName();
-//                String bPlayer = players.getBpLastName();
-//                final String pathPGN = "src/main/resources/"
-//                        + gameDate
-//                        + "_"
-//                        + wPlayer
-//                        + bPlayer
-//                        + ".pgn";
                 File myFilePGN = null;
 
                 final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
@@ -152,6 +165,8 @@ public class GameWindowGameAuto {
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
+                    blackClock.setNull();
+                    whiteClock.setNull();
                     gameWindowFrame.dispose();
                 }
             }
@@ -179,6 +194,39 @@ public class GameWindowGameAuto {
 
     }
 
+    private JPanel clockJPanel() {
+
+        JPanel gameData = new JPanel();
+        gameData.setLayout(new GridLayout(3, 2, 0, 0));
+
+        final JLabel bTime = new JLabel(blackClock.getTime());
+        final JLabel wTime = new JLabel(whiteClock.getTime());
+
+        bTime.setHorizontalAlignment(JLabel.CENTER);
+        bTime.setVerticalAlignment(JLabel.CENTER);
+        wTime.setHorizontalAlignment(JLabel.CENTER);
+        wTime.setVerticalAlignment(JLabel.CENTER);
+
+        ChessTimer wChessTimer = new ChessTimer(boardPanel, whiteClock, wTime);
+        ChessTimer bChessTimer = new ChessTimer(boardPanel, blackClock, bTime);
+
+        if (!(hh == 0 && mm == 0 && ss == 0)) {
+            wThread = new Thread(wChessTimer, "White");
+            wThread.start();
+            bThread = new Thread(bChessTimer, "Black");
+            bThread.start();
+        } else {
+            wTime.setText("Untimed game");
+            bTime.setText("Untimed game");
+        }
+
+        gameData.add(wTime);
+        gameData.add(bTime);
+
+        gameData.setPreferredSize(gameData.getMinimumSize());
+        return gameData;
+    }
+
     private JPanel textJPanel() {
         JPanel textPanel = new JPanel();
 
@@ -197,6 +245,36 @@ public class GameWindowGameAuto {
 
     public void setGameView(String gameView) {
         this.gameView = gameView;
+    }
+
+    public void endGame(String winner) {
+        if (winner == "1 - 0") {
+            int n = JOptionPane.showConfirmDialog(
+                    gameWindowFrame,
+                    "White wins by checkmate!",
+                    "White wins!", JOptionPane.DEFAULT_OPTION);
+
+        } else {
+
+            int n = JOptionPane.showConfirmDialog(
+                    gameWindowFrame,
+                    "Black wins by checkmate!",
+                    "Black wins!", JOptionPane.DEFAULT_OPTION);
+
+        }
+
+        if (wThread == null && bThread == null) {
+            return;
+        }
+        
+        blackClock.setNull();
+        whiteClock.setNull();
+        try {
+            bThread.join();
+            wThread.join();
+        } catch (InterruptedException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
     }
 
 }

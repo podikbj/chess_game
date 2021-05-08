@@ -41,6 +41,7 @@ public class Rook extends Piece {
         if (wasMoved = false && currentTile.getX() == 4) {
             tags.add("0-0-0");
         }
+        wasMoved = true;
         return b;
     }
 

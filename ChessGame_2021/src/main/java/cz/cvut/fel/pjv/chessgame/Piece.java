@@ -2,6 +2,7 @@ package cz.cvut.fel.pjv.chessgame;
 
 import cz.cvut.fel.pjv.start.GameManager;
 import cz.cvut.fel.pjv.view.StartMenu;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +68,7 @@ public abstract class Piece {
         if (tempList != null) {
             b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
         }
+        tempList = null;
         return b;
     }
 
@@ -97,6 +99,7 @@ public abstract class Piece {
         if (tempList != null) {
             b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
         }
+        tempList = null;
         return b;
     }
 
@@ -127,7 +130,7 @@ public abstract class Piece {
         if (tempList != null) {
             b = tempList.stream().filter(p -> !p.getIsEmpty()).findAny().isPresent();
         }
-
+        tempList = null;
         return b;
     }
 
@@ -158,18 +161,18 @@ public abstract class Piece {
                     if (finTile.getX() < currentTile.getX() && finTile.getY() > currentTile.getY()) {
 
                         xy = (p.getX() < currentTile.getX()
-                                && p.getY() < currentTile.getY()
+                                && p.getY() > currentTile.getY()
                                 && p.getX() > finTile.getX()
-                                && p.getY() > finTile.getY());
+                                && p.getY() < finTile.getY());
 
                     }
 
                     if (finTile.getX() < currentTile.getX() && finTile.getY() < currentTile.getY()) {
 
                         xy = (p.getX() < currentTile.getX()
-                                && p.getY() > currentTile.getY()
+                                && p.getY() < currentTile.getY()
                                 && p.getX() > finTile.getX()
-                                && p.getY() < finTile.getY());
+                                && p.getY() > finTile.getY());
 
                     }
 
@@ -181,13 +184,13 @@ public abstract class Piece {
         return tempList;
     }
 
-    protected void addMoveEntry(Tile finTile) {
-        GameManager gameManager = GameManager.getInstance();
-        gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
-    }
+//    protected void addMoveEntry(Tile finTile) {
+//        GameManager gameManager = GameManager.getInstance();
+//        gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
+//    }
 
     public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
-        
+
         if (!StartMenu.isManual) {
             wasMoved = true;
         }
@@ -202,7 +205,7 @@ public abstract class Piece {
             currentTile.removePiece();
             finTile.setCurrentPiece(this);
             this.currentTile = finTile;
-            addMoveEntry(finTile);
+            //addMoveEntry(finTile);
 
             return true;
         }
@@ -211,7 +214,7 @@ public abstract class Piece {
         finTile.setCurrentPiece(this);
         this.currentTile = finTile;
         finTile.setIsEmpty(false);
-        addMoveEntry(finTile);
+        //addMoveEntry(finTile);
         return true;
     }
 
@@ -257,6 +260,5 @@ public abstract class Piece {
     public void setWasMoved(boolean wasMoved) {
         this.wasMoved = wasMoved;
     }
-    
-    
+
 }

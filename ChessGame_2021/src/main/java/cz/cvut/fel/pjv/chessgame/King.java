@@ -55,6 +55,7 @@ public class King extends Piece {
     @Override
     public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
         boolean b = super.move(finTile, tags, removedPieces);
+        wasMoved = true;
         return b;
     }
 

@@ -4,7 +4,7 @@ import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.start.CheckMatePositionControl;
 import cz.cvut.fel.pjv.start.GameManager;
-import cz.cvut.fel.pjv.start.Clock;
+//import cz.cvut.fel.pjv.start.Clock;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -14,34 +14,33 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.HashSet;
 //import java.time.Clock;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
-import java.util.Stack;
+//import java.util.Set;
+//import java.util.Stack;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import javax.swing.*;
-
+//import javax.swing.*;
 @SuppressWarnings("serial")
 public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
 
     private final TileComponent[][] boardTileComponents;
     private TileComponent currentTileComponent;
     private Piece currentPiece;
-    private GameWindowBasic gameWindow;
+    final private GameWindowBasic gameWindowBasic;
     private int computer = -1;
-    private GameManager gameManager = GameManager.getInstance();
-    private CheckMatePositionControl checkMatePositionControl;
-    private LinkedList<Tile> tileList;
+    final private GameManager gameManager = GameManager.getInstance();
+    final private CheckMatePositionControl checkMatePositionControl;
+    final private LinkedList<Tile> tileList;
     private LinkedList<Piece> removedPieces = new LinkedList<>();
     private List<Piece> gmRemovedPieces;
-    private GameStateEnum mode = null;
-    //private Piece lastRemoved = null;
+    private GameStateEnum gameState = null;
+    private String winer = "";
 
     private int xB = 0;
     private int yB = 0;
@@ -50,11 +49,11 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private int counter = 0;
     private HashSet<String> tags = new HashSet<String>();
 
-    public BoardPanel(GameWindowBasic gameWindow, GameStateEnum mode) {
+    public BoardPanel(GameWindowBasic gameWindow, GameStateEnum gameState) {
 
         this.boardTileComponents = new TileComponent[8][12];
-        this.gameWindow = gameWindow;
-        this.mode = mode;
+        this.gameWindowBasic = gameWindow;
+        this.gameState = gameState;
         setLayout(new GridLayout(8, 12));
 
         this.addMouseListener(this);
@@ -108,11 +107,32 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mousePressed(MouseEvent e) {
+
+        if (gameState == GameStateEnum.LOAD_VIEW) {
+            JOptionPane.showMessageDialog(currentTileComponent, "Only view mode");
+            return;
+        }
+        String gv = gameWindowBasic.getGameView();
+        if (gameState == GameStateEnum.LOAD_GAME && gv.contains("#")) {
+            JOptionPane.showMessageDialog(currentTileComponent, "Game is over");
+            return;
+        }
+
+        if (gameState == GameStateEnum.AI_MODEL) {
+            if (currentPiece.getColor() == 0 && computer == 0 && !whiteIsActive) {
+                return;
+            }
+
+            if (currentPiece.getColor() == 1 && computer == 1 && whiteIsActive) {
+                return;
+            }
+        }
+
         xB = e.getX();
         yB = e.getY();
-        //boolean initialMove = false;
 
         currentTileComponent = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
+
         Tile currentTile = currentTileComponent.getCurrentTile();
         currentPiece = null;
 
@@ -123,18 +143,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             if (StartMenu.isManual) {
                 currentTileComponent.setDisplayPiece(false);
                 repaint();
-                return;
-            }
-
-            if (currentPiece.getColor() == 0 && computer == 0 && !whiteIsActive) {
-//                currentTileComponent.setDisplayPiece(false);
-//                repaint();
-                return;
-            }
-
-            if (currentPiece.getColor() == 1 && computer == 1 && whiteIsActive) {
-//                currentTileComponent.setDisplayPiece(false);
-//                repaint();
                 return;
             }
 
@@ -153,6 +161,11 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseReleased(MouseEvent e) {
+
+        if (gameState == GameStateEnum.LOAD_VIEW) {
+            return;
+        }
+
         TileComponent startTileComponent = currentTileComponent;
         Tile startTile = startTileComponent.getCurrentTile();
 
@@ -164,6 +177,9 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             if (StartMenu.isManual) {
                 if (currentTile.getIsEmpty()) {
                     gameManager.move(currentPiece, currentTile, tags, removedPieces);
+
+                    gameManager.addLastMove(startTile, 0);
+                    gameManager.addLastMove(currentTile, 1);
                 }
                 repaint();
                 return;
@@ -175,7 +191,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             if (currentPiece.getColor() == 1 && !whiteIsActive) {
                 return;
             }
-
+            checkMatePositionControl.setWhiteIsActive(whiteIsActive);
             int castling = -1;
             if (currentPiece.toString().equals("R") && !currentPiece.isWasMoved()
                     && (currentTile.getX() == 9 || currentTile.getX() == 7)) {
@@ -183,10 +199,9 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                         null,
                         "Do you want to provide castling?", "Confirmation castling",
                         JOptionPane.OK_CANCEL_OPTION);
-                //  System.out.println("castling1 :" + castling);
+                System.out.println("castling :" + castling);
             }
 
-            checkMatePositionControl.setWhiteIsActive(whiteIsActive);
             if (gameManager.isMoveAllowed(currentPiece, currentTile, startTile, castling)) {
 
                 currentTileComponent.setDisplayPiece(true);
@@ -195,8 +210,26 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 gameManager.addLastMove(startTile, 0);
                 gameManager.addLastMove(currentTile, 1);
 
-                if (checkMatePositionControl.isItCheck(currentPiece)) {
-                    tags.add("+");
+                if (checkMatePositionControl.isItCheck()) {
+                    if (checkMatePositionControl.canEscapeCheck()) {
+                        tags.add("+");
+                    } else {
+                        if (whiteIsActive) {
+                            winer = "1 - 0";
+                        } else {
+                            winer = "0 - 1";
+                        }
+                        tags.add("#");
+                        setGameView(currentPiece, currentTile, startTile);
+                        currentPiece = null;
+                        repaint();
+                        this.removeMouseListener(this);
+                        this.removeMouseMotionListener(this);
+                        gameWindowBasic.endGame(winer);
+                        return;
+                        //repaint();
+                    }
+
                 }
 
                 //if a pawn get oppisite border you are allowed to convert it to any piece exept king
@@ -216,13 +249,16 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 }
 
                 if (castling == JOptionPane.YES_OPTION) {
-
                     doCastling(currentTile);
                 }
 
                 Tile tileRemovedPiece = addRemovedPiecesToLSP();
                 if (tileRemovedPiece != null) {
                     repaintTile(tileRemovedPiece);
+                }
+
+                if (winer == "1/2 - 1/2") {
+                    tags.add("=");
                 }
                 setGameView(currentPiece, currentTile, startTile);
                 whiteIsActive = !whiteIsActive;
@@ -239,72 +275,71 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-//    
     private void setGameView(Piece currentPiece, Tile currentTile, Tile startTile) {
 
         counter++;
 
         StringBuilder sb = new StringBuilder();
-       // StringBuilder lastMove = new StringBuilder();
-        sb.append(gameWindow.getGameView());
+        sb.append(gameWindowBasic.getGameView());
 
         if (whiteIsActive) {
             sb.append(String.valueOf((counter + 1) / 2)).append(". ");
         }
 
-        if (currentPiece.toString() != "P") {
-            sb.append(currentPiece.toString());
-          //  lastMove.append(currentPiece.toString());
-        }
-        sb.append(startTile.coordinatesString());
-        if (tags.contains("x")) {
-            sb.append("x");
-         //   lastMove.append("x");
+        if (tags.contains("O-O-O")) {
+            sb.append("O-O-O");
+        } else if (tags.contains("O-O")) {
+            sb.append("O-O");
         } else {
-            sb.append("-");
-          //  lastMove.append("-");
-        }
 
-        if (tags.contains("x")) {
-            // removedPieces = gameManager.getRemovedPieces();
-            if (removedPieces != null) {
+            if (currentPiece.toString() != "P") {
+                sb.append(currentPiece.toString());
+            }
+            sb.append(startTile.coordinatesString());
+            if (tags.contains("x")) {
+                sb.append("x");
+            } else {
+                sb.append("-");
+            }
+
+            if (tags.contains("x")) {
+                // removedPieces = gameManager.getRemovedPieces();
+                if (removedPieces == null && removedPieces.size() == 0) {
+                    return;
+                }
                 String strP = removedPieces.get(removedPieces.size() - 1).toString();
                 if (!strP.equals("P")) {
                     sb.append(strP);
-                 //   lastMove.append(strP);
                 }
+            }
+
+            sb.append(currentTile.coordinatesString());
+
+            if (tags.contains("#")) {
+                sb.append("#");
+            } else if (tags.contains("+")) {
+                sb.append("+");
             }
         }
 
-        sb.append(currentTile.coordinatesString());
-
-        if (tags.contains("#")) {
-            sb.append("#");
-          //  lastMove.append("#");
-        } else if (tags.contains("+")) {
-            sb.append("+");
-           // lastMove.append("+");
-        }
-
         sb.append(" ");
-        //lastMove.append(" ");
         if (counter % 4 == 0) {
             sb.append("\n");
         }
 
-        //gameManager.setLastMove(lastMove.toString());
         tags.clear();
 
-        gameWindow.setGameView(sb.toString());
-        switch (gameWindow.getGameState()) {
+        gameWindowBasic.setGameView(sb.toString());
+        switch (gameWindowBasic.getGameState()) {
             case GENERAL:
-                gameWindow.getAuto().getTextArea().setText(gameWindow.getGameView());
+                gameWindowBasic.getAuto().getTextArea().setText(gameWindowBasic.getGameView());
                 break;
-            case UPLOAD:
-                gameWindow.getView().getTextArea().setText(gameWindow.getGameView());
+            case LOAD_GAME:
+            case LOAD_VIEW:
+                gameWindowBasic.getView().getTextArea().setText(gameWindowBasic.getGameView());
                 break;
-            case IIMODEL:
-                gameWindow.getComp().getTextArea().setText(gameWindow.getGameView());
+            case AI_MODEL:
+                gameWindowBasic.getComp().getTextArea().setText(gameWindowBasic.getGameView());
                 break;
         }
     }
@@ -386,6 +421,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         return whiteIsActive;
     }
 
+    public void setWhiteIsActive(boolean whiteIsActive) {
+        this.whiteIsActive = whiteIsActive;
+    }
+
     public Piece getCurrentPiece() {
         return currentPiece;
     }
@@ -419,7 +458,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             currentPiece = pieces.get(x);
             startTile = currentPiece.getCurrentTile();
             tlist = gameManager.getAllowedTiles(currentPiece);
-            if (tileList != null && tileList.size() > 0) {
+            if (tlist != null && tlist.size() > 0) {
                 break;
             }
 
@@ -432,7 +471,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         finTile = tlist.get(x);
 
         gameManager.move(currentPiece, finTile, tags, removedPieces);
-        if (checkMatePositionControl.isItCheck(currentPiece)) {
+        gameManager.addLastMove(startTile, 0);
+        gameManager.addLastMove(finTile, 1);
+
+        if (checkMatePositionControl.isItCheck()) {
             tags.add("+");
         }
         setGameView(currentPiece, finTile, startTile);
@@ -442,6 +484,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     public void setComputer(int computer) {
         this.computer = computer;
+    }
+
+    public void setCounter(int counter) {
+        this.counter = counter;
     }
 
 }

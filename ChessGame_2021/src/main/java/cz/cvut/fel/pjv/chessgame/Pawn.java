@@ -66,6 +66,8 @@ public class Pawn extends Piece {
         if (lastMove[0] == null || lastMove[1] == null) {
             return b;
         }
+        if (lastMove[1].getCurrentPiece() == null) { return b; }
+        
         if (!lastMove[1].getCurrentPiece().toString().equals("P")) {
             return b;
         }
@@ -105,6 +107,8 @@ public class Pawn extends Piece {
     @Override
     public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
 
+        wasMoved = true;
+
         if (isEnPassant) {
             if (finLastMoveTile == null) {
                 return false;
@@ -119,7 +123,7 @@ public class Pawn extends Piece {
             currentTile.removePiece();
             finTile.setCurrentPiece(this);
             this.currentTile = finTile;
-            addMoveEntry(finTile);
+            //addMoveEntry(finTile);
             finLastMoveTile = null;
             isEnPassant = false;
 

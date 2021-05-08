@@ -11,31 +11,18 @@ import cz.cvut.fel.pjv.chessgame.Queen;
 import cz.cvut.fel.pjv.chessgame.Rook;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.view.StartMenu;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import java.text.SimpleDateFormat;
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import static java.util.stream.Collectors.toList;
 
 public class GameManager {
 
     private static GameManager instance = null;
 
-    private LinkedList<Tile> tileList = new LinkedList<Tile>();
+    final private LinkedList<Tile> tileList = new LinkedList<Tile>();
 
     private List<Tile> tempTileList = new ArrayList<Tile>();
     private List<String> moveSequence = new ArrayList<String>();
@@ -51,7 +38,8 @@ public class GameManager {
         return instance;
     }
 
-    private GameManager() {}
+    private GameManager() {
+    }
 
     public void initializeCheckMatePositionControl() {
         checkMatePositionControl = new CheckMatePositionControl();
@@ -119,8 +107,8 @@ public class GameManager {
     public void move(Piece currentPiece, Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
         currentPiece.move(finTile, tags, removedPieces);
     }
-    
-    public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces){
+
+    public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
         return checkMatePositionControl.doCastling(finTile, tags, removedPieces);
     }
 
@@ -256,7 +244,11 @@ public class GameManager {
 
                 break;
         }
+        currentPiece = null;
+        newPiece.setCurrentTile(currentTile);
         currentTile.setCurrentPiece(newPiece);
+
+        //return newPiece;
     }
 
     public CheckMatePositionControl getCheckMatePositionControl() {
@@ -289,18 +281,28 @@ public class GameManager {
         return removedPieceses;
     }
 
-public List<Tile> getAllowedTiles(Piece p) {
-    List<Tile> l = new ArrayList<Tile>();
-    boolean b = false;
-    for (Tile t : tileList){
-        b = isMoveAllowed(p,t, p.getCurrentTile(), 0);
-        if (b) {
-            l.add(t);
+    public List<Tile> getAllowedTiles(Piece p) {
+
+        List<Tile> l = new ArrayList<Tile>();
+        final int currentColor = p.getColor();
+
+        List<Tile> tempTList = tileList.stream()
+                .filter(t -> t.getX() > 3)
+                .collect(toList());
+
+        boolean b = false;
+        for (Tile t : tempTList) {
+            if (!t.getIsEmpty() && t.getCurrentPiece().getColor() == currentColor) {
+                continue;
+            }
+            b = isMoveAllowed(p, t, p.getCurrentTile(), 1);
+            if (b) {
+                l.add(t);
+            }
         }
+
+        return l;
     }
-    
-    return l;
-}
 
     public Tile[] getLastMove() {
         return lastMove;
