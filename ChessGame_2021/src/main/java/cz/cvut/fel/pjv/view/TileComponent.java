@@ -1,5 +1,6 @@
 package cz.cvut.fel.pjv.view;
 
+import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -7,10 +8,16 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 
+/**
+ *
+ * @author kira
+ */
 @SuppressWarnings("serial")
 public class TileComponent extends JComponent {
 
@@ -20,7 +27,13 @@ public class TileComponent extends JComponent {
     private int yC = 0;
     private int color;
     private boolean displayPiece;
+    private static Logger logger = Logger.getLogger(TileComponent.class.getName());
 
+    /**
+     *
+     * @param boardPanel
+     * @param currentTile
+     */
     public TileComponent(BoardPanel boardPanel, Tile currentTile) {
 
         this.boardPanel = boardPanel;
@@ -77,8 +90,9 @@ public class TileComponent extends JComponent {
                 if (pieceImage == null) {
                     pieceImage = ImageIO.read(new File(imageFilePath));
                 }
-            } catch (IOException e) {
-                System.out.println("File not found: " + e.getMessage());
+            } catch (IOException ex) {
+                logger.log(Level.SEVERE, "File not found", ex);
+                ex.printStackTrace();
             }
 
             if (currentTile.getCurrentPiece().getColor() == 1) {
@@ -91,23 +105,28 @@ public class TileComponent extends JComponent {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public Tile getCurrentTile() {
         return currentTile;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isDisplayPiece() {
         return displayPiece;
     }
 
+    /**
+     *
+     * @param displayPiece
+     */
     public void setDisplayPiece(boolean displayPiece) {
         this.displayPiece = displayPiece;
     }
 
-//    public void setxC(int xC) {
-//        this.xC = xC;
-//    }
-//
-//    public void setyC(int yC) {
-//        this.yC = yC;
-//    }
 }

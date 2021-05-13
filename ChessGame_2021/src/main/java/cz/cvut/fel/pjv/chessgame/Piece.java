@@ -1,6 +1,7 @@
 package cz.cvut.fel.pjv.chessgame;
 
 import cz.cvut.fel.pjv.start.GameManager;
+import cz.cvut.fel.pjv.view.GameWindowGameAuto;
 import cz.cvut.fel.pjv.view.StartMenu;
 
 import java.awt.image.BufferedImage;
@@ -16,6 +17,9 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import javax.imageio.ImageIO;
 
+/**
+ * Represents a chess piece
+ */
 public abstract class Piece {
 
     protected final int color; // 1 - white; 0 - black
@@ -27,7 +31,16 @@ public abstract class Piece {
     protected GameManager gameManager = GameManager.getInstance();
     protected List<Tile> tileList = gameManager.getTileList();
     private List<Tile> tempList = null;
+    private static Logger logger = Logger.getLogger(Piece.class.getName());
 
+    /**
+     * Constructor for Piece.
+     * @param color piece color
+     * @param tile current tile
+     * @param blackPiecePath path to black piece picture file
+     * @param whitePiecePath path to white piece picture file
+     * @param wasRemoved true if the piece was removed from the chess board
+     */
     public Piece(int color, Tile tile, String blackPiecePath, String whitePiecePath, boolean wasRemoved) {
         this.color = color;
         this.currentTile = tile;
@@ -38,29 +51,67 @@ public abstract class Piece {
             if (this.pieceImage == null) {
                 this.pieceImage = ImageIO.read(new File(imageFilePath));
             }
-        } catch (IOException e) {
-            System.out.println("File not found: " + e.getMessage());
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "File not found", ex);
+            ex.printStackTrace();
+
         }
 
     }
 
+    /**
+     * Checks if the piece is allowed to move to finish tile
+     * @param finTile current tag finish tile
+     * @return true if move is allowed by chess rules
+     */
     public abstract boolean isMoveAllowed(Tile finTile);
 
+    /**
+     * Finds intermediate tiles between current tile and finish tile 
+     * @param finTile current tag finish tile
+     * @return list of intermediate tiles
+     */
     public abstract List<Tile> getIntermediateTiles(Tile finTile);
+    
+    /**
+     * Returns string that includes unique instance name 
+     * @return string that includes unique instance name
+     */
+    public abstract String toString();
 
+    /**
+     * Checks if the move is along diagonal tiles of the board
+     * @param finTile current tag finish tile
+     * @return true if move is along diagonal tiles ot the board
+     */
     public boolean isDiagonalMove(Tile finTile) {
         return (Math.abs(finTile.getX() - currentTile.getX()) == Math.abs(finTile.getY() - currentTile.getY()));
     }
 
+    /**
+     * Checks if the move is along vertical tiles of the board
+     * @param finTile current tag finish tile
+     * @return true if move is along vertical tiles ot the board
+     */
     public boolean isVerticalMove(Tile finTile) { // x const
         return (finTile.getX() == currentTile.getX() && finTile.getY() != currentTile.getY());
     }
 
+    /**
+     * Checks if the move is along horizontal tiles of the board
+     * @param finTile current tag finish tile
+     * @return true if move is along horizontal tiles ot the board
+     */
     public boolean isHorizontalMove(Tile finTile) { // x const
 
         return (finTile.getY() == currentTile.getY() && finTile.getX() != currentTile.getX());
     }
 
+    /**
+     * Finds any occupied tile in horizontal move
+     * @param finTile current tag finish tile
+     * @return true if have found any occupied tile in horizontal move
+     */
     protected boolean isAnyTileIsOccupiedHorizontalMove(Tile finTile) {
 
         boolean b = false;
@@ -72,6 +123,11 @@ public abstract class Piece {
         return b;
     }
 
+    /**
+     * Finds intermediate tiles between current tile and finish tile in horizontal move
+     * @param finTile current tag finish tile
+     * @return list of intermediate tiles
+     */
     public List<Tile> getListOfIntermediateHorizontalTiles(Tile finTile) {
         tempList = tileList.stream()
                 .filter(p -> p.getY() == currentTile.getY())
@@ -92,6 +148,11 @@ public abstract class Piece {
         return tempList;
     }
 
+    /**
+     * Find any occupied tile in vertical move
+     * @param finTile current tag finish tile
+     * @return true if have found any occupied tile in vertical move
+     */
     protected boolean isAnyTileIsOccupiedVerticalMove(Tile finTile) {
 
         boolean b = false;
@@ -103,6 +164,11 @@ public abstract class Piece {
         return b;
     }
 
+    /**
+     * Finds intermediate tiles between current tile and finish tile in vertical move
+     * @param finTile current tag finish tile
+     * @return list of intermediate tiles
+     */
     public List<Tile> getListOfIntermediateVerticalTiles(Tile finTile) {
         tempList = tileList.stream()
                 .filter(p -> p.getX() == currentTile.getX())
@@ -123,6 +189,11 @@ public abstract class Piece {
         return tempList;
     }
 
+    /**
+     * Find any occupied tile in diagonal move
+     * @param finTile current tag finish tile
+     * @return true if have found any occupied tile in diagonal move
+     */
     protected boolean isAnyTileIsOccupiedDiagonalMove(Tile finTile) {
 
         boolean b = false;
@@ -134,6 +205,11 @@ public abstract class Piece {
         return b;
     }
 
+    /**
+     * Finds intermediate tiles between current tile and finish tile in diagonal move
+     * @param finTile current tag finish tile
+     * @return list of intermediate tiles
+     */
     public List<Tile> getListOfIntermediateDiagonalTiles(Tile finTile) {
 
         tempList = tileList.stream()
@@ -184,11 +260,13 @@ public abstract class Piece {
         return tempList;
     }
 
-//    protected void addMoveEntry(Tile finTile) {
-//        GameManager gameManager = GameManager.getInstance();
-//        gameManager.getMoveSequence().add(currentTile.coordinatesString() + "-" + finTile.coordinatesString());
-//    }
-
+    /**
+     * Move piece to finish tile
+     * @param finTile current tag finish tile
+     * @param tags
+     * @param removedPieces
+     * @return true
+     */
     public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
 
         if (!StartMenu.isManual) {
@@ -218,47 +296,98 @@ public abstract class Piece {
         return true;
     }
 
+    /**
+     * Checks if piece on finish tile is the same color or not
+     * @param finTile current tag finish tile
+     * @return false if finish tile is empty. Othewise returns true if piece on finish tile is the same color 
+     */
     protected boolean isTheSameColor(Tile finTile) {
+
         if (finTile.getIsEmpty()) {
             return false;
         }
         return (currentTile.getCurrentPiece().color == finTile.getCurrentPiece().color);
+
     }
 
+    /**
+     * Getter for current tile
+     * @return
+     */
     public Tile getCurrentTile() {
         return currentTile;
     }
 
+    /**
+     * Setter for current tile
+     * @param tile
+     */
     public void setCurrentTile(Tile tile) {
         this.currentTile = tile;
     }
 
+    /**
+     * Getter for piece color
+     * @return
+     */
     public int getColor() {
         return color;
     }
 
-    public void setPath(String path) {
+    /**
+     * Setter for path to piece picture file
+     * @param path
+     */
+    protected void setPath(String path) {
         this.imageFilePath = path;
     }
 
+    /**
+     * Getter for path to piece picture file
+     * @return
+     */
     public String getPath() {
         return imageFilePath;
     }
 
+    /**
+     * Getter for piece picture
+     * @return
+     */
     public BufferedImage getPieceImage() {
         return pieceImage;
     }
 
+    /**
+     * Getter for wasMoved
+     * @return true if peice was moved at least once
+     */
     public boolean isWasMoved() {
         return wasMoved;
     }
 
+    /**
+     * Getter for wasRemoved
+     * @return true if piece was removed from the board
+     */
     public boolean isWasRemoved() {
         return wasRemoved;
     }
 
+    /**
+     * Sets true if piece was moved at least once 
+     * @param wasMoved
+     */
     public void setWasMoved(boolean wasMoved) {
         this.wasMoved = wasMoved;
+    }
+
+    /**
+     * Sets true if piece was removed from the board
+     * @param wasRemoved
+     */
+    public void setWasRemoved(boolean wasRemoved) {
+        this.wasRemoved = wasRemoved;
     }
 
 }

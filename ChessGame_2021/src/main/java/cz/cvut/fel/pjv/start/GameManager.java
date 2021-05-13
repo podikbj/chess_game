@@ -18,6 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Represents a game manager. 
+ * Performs the function of the MVC controller
+ * @author kira
+ */
 public class GameManager {
 
     private static GameManager instance = null;
@@ -31,6 +36,10 @@ public class GameManager {
 
     private LinkedList<Piece> pieces = new LinkedList<Piece>();
 
+    /**
+     *
+     * @return single instance of GameManager
+     */
     public static GameManager getInstance() {
         if (instance == null) {
             instance = new GameManager();
@@ -41,6 +50,9 @@ public class GameManager {
     private GameManager() {
     }
 
+    /**
+     * Creates the CheckMatePositionControl instance 
+     */
     public void initializeCheckMatePositionControl() {
         checkMatePositionControl = new CheckMatePositionControl();
     }
@@ -51,6 +63,9 @@ public class GameManager {
         return tile;
     }
 
+    /**
+     * Creats chess board tiles
+     */
     public void initializeTiles() {
 
         for (int j = 7; j >= 0; j--) {
@@ -104,17 +119,41 @@ public class GameManager {
 
     }
 
+    /**
+     * Invokes move method on piece instance.
+     * 
+     * @param currentPiece current piece
+     * @param finTile finish tile
+     * @param tags set of special string symbols like "+, x, 0-0, 0-0-0"
+     * @param removedPieces list of removed pieces
+     */
     public void move(Piece currentPiece, Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
         currentPiece.move(finTile, tags, removedPieces);
     }
 
+    /**
+     * Invokes doCastling method on checkMatePositionControl instance.
+     * @param finTile finish tile
+     * @param tags set of special string symbols like "+, x, 0-0, 0-0-0"
+     * @param removedPieces list of removed pieces
+     * @return finish king position tile after castling
+     */
     public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
         return checkMatePositionControl.doCastling(finTile, tags, removedPieces);
     }
 
+    /**
+     * Return true if move is allowed according to the piece rules and
+     * if move is allowed according to the chech mate rules
+     * @param currentPiece current piece
+     * @param finTile finish tile
+     * @param startTile start tile
+     * @param castling flag if it is castling
+     * @return true if move is allowed
+     */
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, int castling) {
-        return checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, castling)
-                && currentPiece.isMoveAllowed(finTile);
+        return currentPiece.isMoveAllowed(finTile)
+                && checkMatePositionControl.isMoveAllowed(currentPiece, finTile, startTile, castling);
     }
 
     private void setPieceOnTile(int color) {
@@ -172,6 +211,9 @@ public class GameManager {
 
     }
 
+    /**
+     * Creates pieces and plases them on tiles
+     */
     public void initializePieces() {
 
         final int black = 0;
@@ -216,15 +258,28 @@ public class GameManager {
 
     }
 
+    /**
+     *
+     * @return list of all the tiles
+     */
     public LinkedList<Tile> getTileList() {
         return tileList;
     }
 
-    public List<String> getMoveSequence() {
-        return moveSequence;
-    }
+//    public List<String> getMoveSequence() {
+//        return moveSequence;
+//    }
+    /**
+     * Exchanges the pawn for a selected piece 
+     * @param currentPiece current piece
+     * @param currentTile current piece tile
+     * @param whiteIsActive white is on tag
+     * @param x int index of the piece that player wants to get in exchange for passed pawn
+     */
+    //public void changePawn(Piece currentPiece, Tile currentTile,
+    public void changePawn(Tile currentTile,
+            boolean whiteIsActive, int x, HashSet<String> tags) {
 
-    public void changePawn(Piece currentPiece, Tile currentTile, boolean whiteIsActive, int x) {
         int color = (whiteIsActive == true) ? 1 : 0;
         Piece newPiece = null;
         switch (x) {
@@ -244,17 +299,44 @@ public class GameManager {
 
                 break;
         }
-        currentPiece = null;
+        if (newPiece != null) {
+            tags.add(newPiece.toString());
+        }
+
+        //Piece newPiece = currentTile.getCurrentPiece();
+        Tile currentKingPosition = (whiteIsActive == true)
+                ? checkMatePositionControl.getbKing().getCurrentTile()
+                : checkMatePositionControl.getwKing().getCurrentTile();
+        if (newPiece.isMoveAllowed(currentKingPosition)) {
+            checkMatePositionControl.setCheckFlag(true, newPiece);
+            tags.add("+");
+            int a = 0;
+        }
+
+        currentTile.removePiece();
+        //currentPiece.setCurrentTile(null);
+        //pieces.remove(currentPiece);
+        //currentPiece = null;
+
         newPiece.setCurrentTile(currentTile);
         currentTile.setCurrentPiece(newPiece);
+        pieces.add(newPiece);
 
         //return newPiece;
     }
 
+    /**
+     *
+     * @return instance of checkMatePositionControl
+     */
     public CheckMatePositionControl getCheckMatePositionControl() {
         return checkMatePositionControl;
     }
 
+    /**
+     *
+     * @return list of all pieces that wasn't removed
+     */
     public List<Piece> getPieces() {
         List<Piece> p = null;
         p = pieces.stream()
@@ -263,6 +345,11 @@ public class GameManager {
         return p;
     }
 
+    /**
+     *
+     * @param color
+     * @return list of one color pieces that wasn't removed
+     */
     public List<Piece> getPieces(int color) {
         List<Piece> p = null;
         p = pieces.stream()
@@ -272,6 +359,10 @@ public class GameManager {
         return p;
     }
 
+    /**
+     *
+     * @return list of removed pieces from chess board
+     */
     public List<Piece> getRemovedPieces() {
         List<Piece> removedPieceses = null;
         removedPieceses = pieces.stream()
@@ -281,6 +372,11 @@ public class GameManager {
         return removedPieceses;
     }
 
+    /**
+     *
+     * @param p
+     * @return
+     */
     public List<Tile> getAllowedTiles(Piece p) {
 
         List<Tile> l = new ArrayList<Tile>();
@@ -304,10 +400,19 @@ public class GameManager {
         return l;
     }
 
+    /**
+     *
+     * @return last move start tile and finish tile array
+     */
     public Tile[] getLastMove() {
         return lastMove;
     }
 
+    /**
+     * Adds tiles to array
+     * @param t last mova start/finish tile
+     * @param ind int index: 0 - start tile, 1 - finish tile
+     */
     public void addLastMove(Tile t, int ind) {
         lastMove[ind] = t;
     }

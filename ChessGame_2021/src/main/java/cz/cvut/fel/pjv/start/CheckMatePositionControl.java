@@ -1,21 +1,18 @@
 package cz.cvut.fel.pjv.start;
 
-//import cz.cvut.fel.pjv.view.BoardPanel;
-//import cz.cvut.fel.pjv.chessgame.King;
 import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.view.StartMenu;
 import java.util.ArrayList;
-//import java.util.Comparator;
 import java.util.HashSet;
-//import java.util.LinkedList;
 import java.util.List;
-//import java.util.Stack;
 import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
-//import static java.util.stream.Collectors.toList;
-//import javax.imageio.plugins.tiff.ExifGPSTagSet;
 
+/**
+ *
+ * @author kira
+ */
 public class CheckMatePositionControl {
 
     private boolean whiteIsOnChech = false;
@@ -29,61 +26,43 @@ public class CheckMatePositionControl {
     private GameManager gameManager = GameManager.getInstance();
     private Tile currentKingPosition = null;
     private boolean whiteIsActive = true;
+    private int c = 0;
 
+    /**
+     *
+     */
     public CheckMatePositionControl() {
         setKing(1);
         setKing(0);
         this.tileList = gameManager.getTileList();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isChecked() {
         return (whiteIsActive == true) ? whiteIsOnChech : blackIsOnCheck;
     }
 
-    public boolean isItCheck() {
-
-        boolean b = false;
-
-        setCurrentKingPosition(!whiteIsActive);
-
-        List<Piece> pieces = null;
-        //pieces = (whiteIsActive == true) ? gameManager.getPieces(0) : gameManager.getPieces(1);
-        pieces = (whiteIsActive == true) ? gameManager.getPieces(1) : gameManager.getPieces(0);
-        if (pieces == null) {
-            return b;
-        }
-
-        for (Piece p : pieces) {
-            if (p.isMoveAllowed(currentKingPosition)) {
-                attaker = p;
-                b = true;
-                setCheckFlag(true);
-                break;
-            }
-        }
-//        if (currentPiece.isMoveAllowed(currentKingPosition)) {
-//            b = true;
-//            attaker = currentPiece;
-//            setCheckFlag(true);
-//        }
-
-        return b;
-    }
-
-    public boolean doesMoveBlockCheck(Piece currentPiece, Tile finTile) {
+    /**
+     *
+     * @param currentPiece current piece
+     * @param finTile
+     * @return
+     */
+    public boolean doesMoveBlockCheck(Piece currentPiece, Tile finTile, boolean setBlockFlag) {
 
         boolean doesMoveBlockCheck = false;
         if (finTile == attaker.getCurrentTile()) {
-            attaker = null;
-            if (blackIsOnCheck) {
-                blackIsOnCheck = !blackIsOnCheck;
-            }
-            if (whiteIsOnChech) {
-                whiteIsOnChech = !whiteIsOnChech;
+            if (setBlockFlag) {
+                //attaker = null;
+                setCheckFlag(false, null);
             }
             return true;
         }
-        setCurrentKingPosition(whiteIsActive);
+        boolean wia = (attaker.getColor() == 1) ? false : true;
+        setCurrentKingPosition(wia);
         List<Tile> tempList = null;
         if (attaker.isVerticalMove(currentKingPosition)) {
             tempList = attaker.getListOfIntermediateVerticalTiles(currentKingPosition);
@@ -97,54 +76,129 @@ public class CheckMatePositionControl {
 
         if (tempList != null && tempList.contains(finTile)) {
             doesMoveBlockCheck = true;
-            attaker = null;
-//            if (blackIsOnCheck) {
-//                blackIsOnCheck = !blackIsOnCheck;
-//            }
-//            if (whiteIsOnChech) {
-//                whiteIsOnChech = !whiteIsOnChech;
-//            }
-            setCheckFlag(false);
+            if (setBlockFlag) {
+                // attaker = null;
+                setCheckFlag(false, null);
+            }
         }
         return doesMoveBlockCheck;
     }
 
-    private boolean doesMoveCauseCheck(Piece currentPiece, Tile finTile, Tile startTile) {
-        boolean b = false;
-        if (currentPiece != startTile.getCurrentPiece()) {
-            return b;
-        }
-        setCurrentKingPosition(whiteIsActive);
-        startTile.removePiece();
+    /**
+     *
+     * @param currentPiece current piece
+     * @param finTile
+     * @param startTile
+     * @param self
+     * @return
+     */
+    public boolean doesMoveCauseCheck(Piece currentPiece, Tile finTile, Tile startTile, boolean self) {
 
-        List<Piece> pieces = null;
-        pieces = (whiteIsActive == true) ? gameManager.getPieces(0) : gameManager.getPieces(1);
-        if (pieces == null) {
-            return b;
-        }
-        for (Piece p : pieces) {
-            if (p.isMoveAllowed(currentKingPosition)) {
-                if (finTile == p.getCurrentTile()) {
-                    break;
+        //can put on check current king because of free start tile
+        if (self) {
+            if (currentPiece.toString().equals("K")) {
+                return kingMoveCauseCheck(finTile, currentPiece, false);
+            }
+            boolean wia = whiteIsActive;
+            if ((whiteIsActive && blackIsOnCheck) || (!whiteIsActive && whiteIsOnChech)) {
+                wia = !whiteIsActive;
+            }
+            setCurrentKingPosition(wia);
+
+            int color = (wia == true) ? 0 : 1;
+            List<Piece> pieces = gameManager.getPieces(color);
+            if (pieces.size() <= 1) {
+                return false;
+            }
+
+            Piece tempPiece = null;
+            if (!finTile.getIsEmpty()) {
+                tempPiece = finTile.getCurrentPiece();
+                finTile.removePiece();
+            }
+
+            startTile.removePiece();
+
+            finTile.setCurrentPiece(currentPiece);
+            currentPiece.setCurrentTile(finTile);
+
+            for (Piece p : pieces) {
+                if (p == tempPiece) {
+                    continue;
                 }
+                if (p.isMoveAllowed(currentKingPosition)) {
+//                    if (finTile == p.getCurrentTile()) {
+//                        break;
+//                    }
+                    List<Tile> tempList = p.getIntermediateTiles(currentKingPosition);
+                    if (tempList != null && tempList.contains(startTile)) {
+                        return true;
+                    }
+                }
+            }
+
+            finTile.removePiece();
+            if (tempPiece != null) {
+                finTile.setCurrentPiece(tempPiece);
+                tempPiece.setCurrentTile(finTile);
+            }
+            currentPiece.setCurrentTile(startTile);
+            startTile.setCurrentPiece(currentPiece);
+            return false;
+        }
+
+        setCurrentKingPosition(!whiteIsActive);
+
+//can put on check opposite king by current piece because of moving on finish tile
+        if (currentPiece.isMoveAllowed(currentKingPosition)) {
+            //attaker = currentPiece;
+            setCheckFlag(true, currentPiece);
+            return true;
+        }
+
+// can put on check opposite king by any other piece because of free start tile
+        int color = (whiteIsActive == true) ? 1 : 0;
+        List<Piece> pieces = gameManager.getPieces(color);
+        if (pieces.size() <= 2) {
+            return false;
+        }
+
+        for (Piece p : pieces) {
+            if (p == currentPiece) {
+                continue;
+            }
+            if (p.isMoveAllowed(currentKingPosition)) {
                 List<Tile> tempList = p.getIntermediateTiles(currentKingPosition);
                 if (tempList != null && tempList.contains(startTile)) {
-                    b = true;
-                    break;
+                    //attaker = p;
+                    setCheckFlag(true, p);
+                    return true;
                 }
             }
         }
 
-        currentPiece.setCurrentTile(startTile);
-        startTile.setCurrentPiece(currentPiece);
-
-        return b;
+        return false;
     }
 
+    /**
+     *
+     * @param currentPiece current piece
+     * @param finTile
+     * @param startTile
+     * @param castling
+     * @return
+     */
     public boolean isMoveAllowed(Piece currentPiece, Tile finTile, Tile startTile, int castling) {
         //it's not allowed to capture a king
         boolean isKingTile = isKingTile(finTile);
         if (isKingTile) {
+            return false;
+        }
+
+        //it's not allowed to make some moves causing to check
+        boolean doesMoveCauseCheck = false;
+        doesMoveCauseCheck = doesMoveCauseCheck(currentPiece, finTile, startTile, true);
+        if (doesMoveCauseCheck) {
             return false;
         }
 
@@ -154,18 +208,17 @@ public class CheckMatePositionControl {
         if (isChecked()) {
             if (currentPiece.toString().equals("K")) {
                 doesKingCanEscapeCheck = !kingMoveCauseCheck(finTile, currentPiece, false);
+                if (doesKingCanEscapeCheck) {
+                    setCheckFlag(false, null);
+                }
             } else {
-                doesMoveBlockCheck = doesMoveBlockCheck(currentPiece, finTile);
+                doesMoveBlockCheck = doesMoveBlockCheck(currentPiece, finTile, true);
+                if (doesMoveBlockCheck) {
+                    setCheckFlag(false, null);
+                }
             }
         }
         if (!doesMoveBlockCheck || !doesKingCanEscapeCheck) {
-            return false;
-        }
-
-        //it's not allowed to make some moves causing to check
-        boolean doesMoveCauseCheck = false;
-        doesMoveCauseCheck = doesMoveCauseCheck(currentPiece, finTile, startTile);
-        if (doesMoveCauseCheck) {
             return false;
         }
 
@@ -183,6 +236,11 @@ public class CheckMatePositionControl {
     }
 
     // King's stuff
+    /**
+     *
+     * @param finTile
+     * @return
+     */
     public boolean isKingTile(Tile finTile) {
 
         boolean isKingTile = false;
@@ -195,6 +253,10 @@ public class CheckMatePositionControl {
 
     }
 
+    /**
+     *
+     * @param color
+     */
     public void setKing(int color) {
 
         List<Piece> pieces = null;
@@ -243,73 +305,104 @@ public class CheckMatePositionControl {
         return tempList;
     }
 
-    public List<Tile> getAvailableTiles(int color) {
-
-        List<Tile> l = new ArrayList<Tile>();
-
-        List<Tile> tempTList = tileList.stream()
-                .filter(t -> t.getX() > 3)
-                .filter((p)
-                        -> {
-                    boolean x = false;
-                    if (!p.getIsEmpty()) {
-                        x = p.getCurrentPiece().getColor() != color;
-                    } else {
-                        x = p.getIsEmpty();
-                    }
-
-                    return x;
-                })
-                .collect(toList());
-
-        return tempTList;
-    }
-
-    public boolean canEscapeCheck() {
+    private boolean kingCanEscapeCheck() {
         boolean b = true;
-        Piece king = (whiteIsActive == true) ? bKing : wKing;
         List<Tile> tempList = getTilesAroundKing();
-        if (tempList.size() == 0) {
-            setCheckFlag(false);
-            return b;
-        }
+        Piece king = (whiteIsActive == true) ? bKing : wKing;
 
-        //boolean kingMoveCauseCheck = kingMoveCauseCheck(t, king, false);
         for (Tile t : tempList) {
             if (king.isMoveAllowed(t) && !kingMoveCauseCheck(t, king, false)) {
-                setCheckFlag(false);
+                //setCheckFlag(false);
                 return b;
-            }
-        }
-
-        List<Piece> pieces = null;
-        pieces = (king.getColor() == 1) ? gameManager.getPieces(1) : gameManager.getPieces(0);
-        if (pieces.size() == 0) {
-            setCheckFlag(false);
-            return b;
-        }
-
-        tempList = getAvailableTiles(king.getColor());
-        if (tempList.size() == 0) {
-            setCheckFlag(false);
-            return b;
-        }
-
-        for (Piece p : pieces) {
-            if (p.toString().equals("K")) {
-                continue;
-            }
-            for (Tile t : tempList) {
-                if (p.isMoveAllowed(t) && doesMoveBlockCheck(p, t)) {
-                    setCheckFlag(false);
-                    return b;
-                }
             }
         }
         return false;
     }
 
+    private boolean checkCanBeBlocked() {
+        //boolean b = true;
+        int color = -1;
+        if (whiteIsActive && blackIsOnCheck) {
+            color = 0;
+        }
+        if (!whiteIsActive && whiteIsOnChech) {
+            color = 1;
+        }
+        if (color == -1) {
+            return false;
+        }
+
+        Piece king = (whiteIsActive == true) ? bKing : wKing;
+        setCurrentKingPosition(!whiteIsActive);
+        //int color = (whiteIsActive == true) ? 0 : 1;
+        List<Piece> pieces = (gameManager.getPieces(color));
+        if (pieces.size() <= 1) {
+            //setCheckFlag(true);
+            return false;
+        }
+
+        if (attaker.getColor() == color) {
+            return false;
+        }
+
+        List<Tile> tempList = attaker.getIntermediateTiles(currentKingPosition);
+        if (tempList == null) {
+            return false;
+        }
+
+        tempList.add(attaker.getCurrentTile());
+
+        for (Piece p : pieces) {
+            if (p == king) {
+                continue;
+            }
+            for (Tile t : tempList) {
+                if (p.isMoveAllowed(t) && doesMoveBlockCheck(p, t, false)) {
+                    if (doesMoveCauseCheck(p, t, p.getCurrentTile(), true)) {
+//                        attaker = p;
+//                        setCheckFlag(true);
+                        return false;
+                    } else {
+                        //setCheckFlag(false);
+                        return true;
+                    }
+                }
+
+            }
+        }
+        // setCheckFlag(false);
+        return false;
+
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean canEscapeCheck() {
+
+        boolean b = true;
+        boolean kingCanEscapeCheck = kingCanEscapeCheck();
+        if (kingCanEscapeCheck) {
+            return true;
+        }
+
+        boolean checkCanBeBlocked = checkCanBeBlocked();
+        if (checkCanBeBlocked) {
+            return true;
+        }
+
+        return false;
+
+    }
+
     //Castling stuff
+    /**
+     *
+     * @param currentPiece current piece
+     * @param finTile
+     * @return
+     */
     public boolean castlingIsAllowed(Piece currentPiece, Tile finTile) {
         boolean b = true;
         if (isChecked()) {
@@ -343,13 +436,12 @@ public class CheckMatePositionControl {
     private boolean kingMoveCauseCheck(Tile finTile, Piece king, boolean isCastling) {
 
         boolean b = false;
-        boolean colorB = (king.getColor() == 1) ? true : false;
-        setCurrentKingPosition(colorB);
-        List<Piece> pieces = null;
-        pieces = (king.getColor() == 1) ? gameManager.getPieces(0) : gameManager.getPieces(1);
-        if (pieces.size() == 0) {
-            return b;
+        List<Piece> pieces = (king.getColor() == 1) ? gameManager.getPieces(0) : gameManager.getPieces(1);
+
+        if (pieces.size() <= 1) {
+            return false;
         }
+
         Tile finishTile = finTile;
         if (isCastling) {
             final int ad = (finTile.getX() == 9) ? 1 : -1;
@@ -362,7 +454,7 @@ public class CheckMatePositionControl {
         }
 
         if (finishTile == null) {
-            return b = false;
+            return false;
         }
 
         Piece tempPiece = null;
@@ -373,17 +465,29 @@ public class CheckMatePositionControl {
             finishTile.removePiece();
 
             for (Piece p : pieces) {
+                if (p == attaker) {
+                    continue;
+                }
+                if (p == tempPiece) {
+                    continue;
+                }
                 if (p.isMoveAllowed(finishTile)) {
-                    b = true;
+                    //b = true;
                     finishTile.setCurrentPiece(tempPiece);
                     tempPiece.setCurrentTile(finishTile);
-                    return b;
+                    return true;
                 }
             }
+            finishTile.setCurrentPiece(tempPiece);
+            tempPiece.setCurrentTile(finishTile);
+
             return b;
         }
 
         for (Piece p : pieces) {
+//            if (p == attaker) {
+//                continue;
+//            }
             if (p.isMoveAllowed(finishTile)) {
                 b = true;
                 break;
@@ -394,6 +498,13 @@ public class CheckMatePositionControl {
 
     }
 
+    /**
+     *
+     * @param finTile
+     * @param tags
+     * @param removedPieces
+     * @return
+     */
     public Tile doCastling(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
 
         Piece king = (whiteIsActive == true) ? wKing : bKing;
@@ -445,10 +556,12 @@ public class CheckMatePositionControl {
 
     }
 
-    private void setCheckFlag(boolean flag) {
+    public void setCheckFlag(boolean flag, Piece attaker) {
+
+        this.attaker = attaker;
 
         if (flag) {
-
+            this.attaker = attaker;
             if (whiteIsActive) {
                 blackIsOnCheck = true;
                 whiteIsOnChech = false;
@@ -468,8 +581,20 @@ public class CheckMatePositionControl {
         }
     }
 
+    /**
+     *
+     * @param whiteIsActive
+     */
     public void setWhiteIsActive(boolean whiteIsActive) {
         this.whiteIsActive = whiteIsActive;
+    }
+
+    public Piece getwKing() {
+        return wKing;
+    }
+
+    public Piece getbKing() {
+        return bKing;
     }
 
 }

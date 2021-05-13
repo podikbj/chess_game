@@ -1,21 +1,38 @@
 package cz.cvut.fel.pjv.chessgame;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 
+/**
+ * Represents a Pawn piece
+ *
+ * @author kira
+ */
 public class Pawn extends Piece {
 
     private boolean isEnPassant = false;
-    //private Tile intermediateTile = null;
     private Tile finLastMoveTile = null;
 
+    /**
+     * Constructor for Pawn.
+     *
+     * @param color piece color
+     * @param tile current tile
+     * @param blackPiecePath path to black piece picture file
+     * @param whitePiecePath path to white piece picture file
+     * @param wasRemoved true if the piece was removed from the chess board
+     */
     public Pawn(int color, Tile tile, boolean wasRemoved) {
         super(color, tile, "src/main/resources/bpawn.png",
                 "src/main/resources/wpawn.png", wasRemoved);
     }
 
+    /**
+     * Checks if the piece is allowed to move to finish tile
+     *
+     * @param finTile current tag finish tile
+     * @return true if move is allowed by chess rules
+     */
     @Override
     public boolean isMoveAllowed(Tile finTile) {
         boolean b = false;
@@ -66,8 +83,10 @@ public class Pawn extends Piece {
         if (lastMove[0] == null || lastMove[1] == null) {
             return b;
         }
-        if (lastMove[1].getCurrentPiece() == null) { return b; }
-        
+        if (lastMove[1].getCurrentPiece() == null) {
+            return b;
+        }
+
         if (!lastMove[1].getCurrentPiece().toString().equals("P")) {
             return b;
         }
@@ -104,6 +123,13 @@ public class Pawn extends Piece {
         return b;
     }
 
+    /**
+     *
+     * @param finTile
+     * @param tags
+     * @param removedPieces
+     * @return
+     */
     @Override
     public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
 
@@ -134,11 +160,22 @@ public class Pawn extends Piece {
         return b;
     }
 
+    /**
+     * Return string that includes unique instance name
+     *
+     * @return string that includes unique instance name
+     */
     @Override
     public String toString() {
         return "P";
     }
 
+    /**
+     * Gets intermediate tiles between current tile and finish tile
+     *
+     * @param finTile current tag finish tile
+     * @return null
+     */
     @Override
     public List<Tile> getIntermediateTiles(Tile finTile) {
         List<Tile> tempList = null;

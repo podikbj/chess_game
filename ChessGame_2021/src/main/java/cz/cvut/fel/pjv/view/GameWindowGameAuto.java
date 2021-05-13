@@ -1,5 +1,6 @@
 package cz.cvut.fel.pjv.view;
 
+import cz.cvut.fel.pjv.chessgame.Players;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.start.ChessTimer;
 import cz.cvut.fel.pjv.start.Clock;
@@ -9,19 +10,19 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -35,13 +36,24 @@ import javax.swing.JScrollBar;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+/**
+ *
+ * @author kira
+ */
 public class GameWindowGameAuto {
 
     private GameWindowBasic gameWindowBasic;
     private JFrame gameWindowFrame;
     private BoardPanel boardPanel;
 
+    /**
+     *
+     */
     public Clock blackClock = null;
+
+    /**
+     *
+     */
     public Clock whiteClock = null;
 
     private Thread wThread = null;
@@ -60,15 +72,24 @@ public class GameWindowGameAuto {
     private int mm = 0;
     private int ss = 0;
 
-    //private GameStateEnum gameState;
+    private String pathPGN;
+    private File myFilePGN;
+    private String winner;
+
+    private int gameIsOver = 1;
+    private Players pl = Players.getInstance();
+    private ArrayList< StringBuilder> initialGameData = new ArrayList<>();
+
+    /**
+     *
+     * @param gameWindowBasic
+     * @param bp
+     */
     public GameWindowGameAuto(GameWindowBasic gameWindowBasic, BoardPanel bp) {
         this.gameWindowBasic = gameWindowBasic;
 
         this.gameWindowFrame = new JFrame("Chess general");
         gameWindowFrame.setLocation(100, 100);
-        final JMenuBar menuBar = createMenuBar();
-
-        gameWindowFrame.setJMenuBar(menuBar);
 
         this.boardPanel = bp;
 
@@ -80,23 +101,26 @@ public class GameWindowGameAuto {
         mm = gameWindowBasic.getMM();
         ss = gameWindowBasic.getSS();
 
-        blackClock = new Clock(hh, mm, ss);
-        whiteClock = new Clock(hh, mm, ss);
+        blackClock = new Clock(hh, mm, ss, 0);
+        whiteClock = new Clock(hh, mm, ss, 1);
 
-        JPanel clockPanel = clockJPanel();
+        Box components = Box.createVerticalBox();
+        components.setSize(components.getPreferredSize());
+        Box clockBox = clockJPanel();
+        clockBox.setSize(clockBox.getPreferredSize());
+        components.add(clockBox, BorderLayout.SOUTH);
+        gameWindowFrame.add(components, BorderLayout.NORTH);
 
-        clockPanel.setSize(clockPanel.getPreferredSize());
-        gameWindowFrame.add(clockPanel, BorderLayout.NORTH);
+        final JMenuBar menuBar = createMenuBar();
+        gameWindowFrame.setJMenuBar(menuBar);
 
         JPanel textPanel = textJPanel();
-
         textPanel.setSize(textPanel.getPreferredSize());
         gameWindowFrame.add(textPanel, BorderLayout.EAST);
 
         gameWindowFrame.add(boardPanel, BorderLayout.CENTER);
-
         gameWindowFrame.add(buttons(), BorderLayout.SOUTH);
-        gameWindowFrame.setSize(gameWindowFrame.getPreferredSize());
+        //gameWindowFrame.setSize(gameWindowFrame.getPreferredSize());
         gameWindowFrame.setSize(
                 new Dimension(600, 600));
         gameWindowFrame.setResizable(
@@ -121,29 +145,30 @@ public class GameWindowGameAuto {
         savePNG.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                File myFilePGN = null;
 
-                final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
-                //final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File(pathPGN));
-                int result = fileChooser.showOpenDialog(gameWindowFrame);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    myFilePGN = fileChooser.getSelectedFile();
-                }
+                setMyFilePGN();
 
-                //File myFilePGN = new File(pathPGN);
                 try {
-                    FileWriter writer = new FileWriter(myFilePGN, true);
-                    BufferedWriter bw = new BufferedWriter(writer);
-                    gameView = gameWindowBasic.getGameView();
-                    bw.write(gameView);
-                    bw.close();
+                    PrintWriter writer = new PrintWriter(myFilePGN);
+                    writer.print("");
+                    writer.close();
+                    writer = new PrintWriter(myFilePGN);
+
+                    fillInInitialGameData();
+                    StringBuilder sb = new StringBuilder();
+                    addToInitialGameData(sb.append("[Result ]")
+                            .append("\n"));
+
+                    for (StringBuilder element : initialGameData) {
+                        String str = element.toString();
+                        writer.println(str);
+                    }
+                    saveGameData(writer);
+
                 } catch (IOException ex) {
-                    logger.log(Level.SEVERE, "Error occur in saving Game Report", ex);
+                    logger.log(Level.SEVERE, "Can't save game to file", ex);
                     ex.printStackTrace();
                 }
-
             }
 
         });
@@ -161,7 +186,7 @@ public class GameWindowGameAuto {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to quit?",
+                        "Do you want to quit?",
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -172,12 +197,20 @@ public class GameWindowGameAuto {
             }
         });
 
+        final JButton gGame = new JButton("Start game after manual setting");
+
+        gGame.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                StartMenu.isManual = false;
+            }
+        });
+
         final JButton nGame = new JButton("New game");
         nGame.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to upload a new game?",
+                        "Do you want to load a new game?",
                         "Confirm new game", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -187,86 +220,168 @@ public class GameWindowGameAuto {
             }
         });
 
+        final JButton draw = new JButton("Draw");
+        draw.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                int n = JOptionPane.showConfirmDialog(
+                        gameWindowFrame,
+                        "Do you want to end the game in a draw?",
+                        "Confirm draw", JOptionPane.YES_NO_OPTION);
+
+                if (n == JOptionPane.YES_OPTION) {
+                    setMyFilePGN();
+                    winner = "1/2 - 1/2";
+                    saveGame(winner);
+
+                    if (wThread == null && bThread == null) {
+                        return;
+                    }
+
+                    blackClock.setNull();
+                    whiteClock.setNull();
+                    try {
+                        bThread.join();
+                        wThread.join();
+                    } catch (InterruptedException ex) {
+                        logger.log(Level.SEVERE, null, ex);
+                    }
+                    gameWindowFrame.dispose();
+                }
+            }
+        }
+        );
+
         buttons.add(nGame);
+
+        buttons.add(gGame);
+        buttons.add(draw);
         buttons.add(quit);
+
         buttons.setPreferredSize(buttons.getMinimumSize());
         return buttons;
 
     }
 
-    private JPanel clockJPanel() {
+    private Box clockJPanel() {
 
-        JPanel gameData = new JPanel();
-        gameData.setLayout(new GridLayout(3, 2, 0, 0));
+        Box clockBox = Box.createHorizontalBox();
 
-        final JLabel bTime = new JLabel(blackClock.getTime());
+        JPanel wClockPanel = new JPanel();
+        final JLabel wLabel = new JLabel("White");
         final JLabel wTime = new JLabel(whiteClock.getTime());
+        //wTime.setSize(new Dimension(20, 15));
+
+        JPanel bClockPanel = new JPanel();
+        final JLabel bLabel = new JLabel("Black");
+        final JLabel bTime = new JLabel(blackClock.getTime());
 
         bTime.setHorizontalAlignment(JLabel.CENTER);
         bTime.setVerticalAlignment(JLabel.CENTER);
         wTime.setHorizontalAlignment(JLabel.CENTER);
         wTime.setVerticalAlignment(JLabel.CENTER);
 
-        ChessTimer wChessTimer = new ChessTimer(boardPanel, whiteClock, wTime);
-        ChessTimer bChessTimer = new ChessTimer(boardPanel, blackClock, bTime);
+        ChessTimer wChessTimer = new ChessTimer(boardPanel, whiteClock, wTime, this);
+        ChessTimer bChessTimer = new ChessTimer(boardPanel, blackClock, bTime, this);
 
         if (!(hh == 0 && mm == 0 && ss == 0)) {
             wThread = new Thread(wChessTimer, "White");
             wThread.start();
             bThread = new Thread(bChessTimer, "Black");
             bThread.start();
+
         } else {
             wTime.setText("Untimed game");
             bTime.setText("Untimed game");
         }
 
-        gameData.add(wTime);
-        gameData.add(bTime);
+        wClockPanel.add(wLabel);
+        wClockPanel.add(wTime);
 
-        gameData.setPreferredSize(gameData.getMinimumSize());
-        return gameData;
+        bClockPanel.add(bLabel);
+        bClockPanel.add(bTime);
+
+        clockBox.add(wClockPanel);
+        clockBox.add(bClockPanel);
+
+        clockBox.setPreferredSize(clockBox.getPreferredSize());
+
+        return clockBox;
     }
 
     private JPanel textJPanel() {
         JPanel textPanel = new JPanel();
 
         textArea.setEditable(false);
-        JScrollBar scrollBar = new JScrollBar();
-
         textPanel.add(textArea);
-        //textPanel.add(scrollBar);
         textPanel.setPreferredSize(new Dimension(250, 400));
         return textPanel;
     }
 
+    /**
+     *
+     * @return
+     */
     public JTextArea getTextArea() {
         return textArea;
     }
 
+    /**
+     *
+     * @param gameView
+     */
     public void setGameView(String gameView) {
         this.gameView = gameView;
     }
 
-    public void endGame(String winner) {
-        if (winner == "1 - 0") {
-            int n = JOptionPane.showConfirmDialog(
-                    gameWindowFrame,
-                    "White wins by checkmate!",
-                    "White wins!", JOptionPane.DEFAULT_OPTION);
+    /**
+     *
+     * @return
+     */
+    public JFrame getGameWindowFrame() {
+        return gameWindowFrame;
+    }
+
+    /**
+     *
+     * @param winner
+     * @param byTime
+     */
+    public void endGame(String winner, boolean byTime) {
+        int n;
+        StringBuilder sb = new StringBuilder();
+
+        if (byTime) {
+            sb.append(" wins by time! Save the game? \n"
+                    + "Choosing \"No\" quits the game.");
 
         } else {
+            sb.append(" wins by checkmate! Save the game? \n"
+                    + "Choosing \"No\" quits the game.");
+        }
+        String message = (winner.equals("1 - 0"))
+                ? "White" + sb.toString() : "Black" + sb.toString();
 
-            int n = JOptionPane.showConfirmDialog(
-                    gameWindowFrame,
-                    "Black wins by checkmate!",
-                    "Black wins!", JOptionPane.DEFAULT_OPTION);
+        String title = (winner.equals("1 - 0"))
+                ? "White wins!" : "Black wins!";
 
+        n = JOptionPane.showConfirmDialog(
+                gameWindowFrame,
+                message, "Confirm save", JOptionPane.YES_NO_OPTION);
+
+        if (n == JOptionPane.YES_OPTION) {
+            saveGame(winner);
+        } else {
+            gameWindowFrame.dispose();
         }
 
         if (wThread == null && bThread == null) {
             return;
         }
-        
+        if (wThread == null && bThread == null) {
+            return;
+        }
+
         blackClock.setNull();
         whiteClock.setNull();
         try {
@@ -275,6 +390,141 @@ public class GameWindowGameAuto {
         } catch (InterruptedException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
+        gameWindowFrame.dispose();
     }
 
+    private void saveGame(String result) {
+
+        setMyFilePGN();
+
+        try {
+            PrintWriter writer = new PrintWriter(myFilePGN);
+            writer.print("");
+            writer.close();
+            writer = new PrintWriter(myFilePGN);
+
+            initialGameData.clear();
+            StringBuilder sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Event \"").append(pl.getCupName()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Site \"").append(pl.getCity() + ", ").append(pl.getCountry()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Date \"").append(pl.getDate()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Round \"").append(pl.getRound()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[White \"").append(pl.getWpLastName())
+                    .append(", ")
+                    .append(pl.getWpName())
+                    .append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Black \"").append(pl.getBpLastName())
+                    .append(", ")
+                    .append(pl.getBpName())
+                    .append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Result \"").append(result)
+                    .append("\"]")
+                    .append("\n"));
+
+            for (StringBuilder element : initialGameData) {
+                String str = element.toString();
+                writer.println(str);
+            }
+            saveGameData(writer);
+
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Can't save game to file", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    private void setMyFilePGN() {
+//        if (myFilePGN != null) {
+//            return;
+//        }
+        myFilePGN = new File("src/main/resources/"
+                + pl.getDate()
+                + "_"
+                + pl.getWpLastName()
+                + pl.getBpLastName()
+                + ".pgn");
+
+        pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(pathPGN));
+        int result = fileChooser.showOpenDialog(gameWindowFrame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            myFilePGN = fileChooser.getSelectedFile();
+        }
+    }
+
+    private void fillInInitialGameData() {
+
+        initialGameData.clear();
+        StringBuilder sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Event \"").append(pl.getCupName()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Site \"").append(pl.getCity() + ", ").append(pl.getCountry()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Date \"").append(pl.getDate()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Round \"").append(pl.getRound()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[White \"").append(pl.getWpLastName())
+                .append(", ")
+                .append(pl.getWpName())
+                .append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Black \"").append(pl.getBpLastName())
+                .append(", ")
+                .append(pl.getBpName())
+                .append("\"]"));
+    }
+
+    private void addToInitialGameData(StringBuilder sb) {
+        initialGameData.add(sb);
+    }
+
+    private void saveGameData(PrintWriter writer) {
+
+        try {
+            BufferedWriter bw = new BufferedWriter(writer);
+            gameView = gameWindowBasic.getGameView();
+            bw.write(gameView);
+            bw.close();
+
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Can't find file", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     *
+     */
+    public synchronized void decrementGameIsOver() {
+        this.gameIsOver--;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public synchronized int getGameIsOver() {
+        return gameIsOver;
+    }
 }

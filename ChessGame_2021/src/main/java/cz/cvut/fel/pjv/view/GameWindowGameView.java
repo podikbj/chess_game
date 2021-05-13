@@ -1,6 +1,8 @@
 package cz.cvut.fel.pjv.view;
 
+import cz.cvut.fel.pjv.chessgame.Pawn;
 import cz.cvut.fel.pjv.chessgame.Piece;
+import cz.cvut.fel.pjv.chessgame.Players;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.start.CheckMatePositionControl;
 import cz.cvut.fel.pjv.start.GameManager;
@@ -16,12 +18,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.print.attribute.standard.PresentationDirection;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -33,6 +38,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
+/**
+ *
+ * @author kira
+ */
 public class GameWindowGameView {
 
     private final JFrame gameWindowFrame;
@@ -45,7 +54,7 @@ public class GameWindowGameView {
     private Piece currentPiece = null;
     private Tile tile = null;
     private final LinkedList<Tile> tileList;
-    private final static Logger logger = Logger.getLogger(GameForm.class.getName());
+    private final static Logger logger = Logger.getLogger(GameWindowGameView.class.getName());
     private String gameView = "";
     private JTextArea textArea = new JTextArea();
     private StringBuilder sb = new StringBuilder();
@@ -55,6 +64,22 @@ public class GameWindowGameView {
     private LinkedList<Piece> removedPieces = new LinkedList<Piece>();
     private GameStateEnum gameState;
 
+    private Players pl = Players.getInstance();
+    private ArrayList< StringBuilder> initialGameData = new ArrayList<>();
+    private String pathPGN;
+    private File myFilePGN;
+    private String winner = "";
+
+    int x = -1;
+    String s = null;
+    String trimedTag;
+
+    /**
+     *
+     * @param gameWindowBasic
+     * @param bp
+     * @param gameState
+     */
     public GameWindowGameView(GameWindowBasic gameWindowBasic, BoardPanel bp, GameStateEnum gameState) {
 
         this.gameWindowBasic = gameWindowBasic;
@@ -134,25 +159,23 @@ public class GameWindowGameView {
     }
 
     private void loadGameFromFile() {
-        //                Players players = Players.getInstance();
-//                String gameDate = players.getDate();
-//                String wPlayer = players.getWpLastName();
-//                String bPlayer = players.getBpLastName();
-//                final String pathPGN = "src/main/resources/"
-//                        + gameDate
-//                        + "_"
-//                        + wPlayer
-//                        + bPlayer
-//                        + ".pgn";
+
+        File myFilePGN = null;
+
+        final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(pathPGN));
+        int result = fileChooser.showOpenDialog(gameWindowFrame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            myFilePGN = fileChooser.getSelectedFile();
+        }
+
         tryCounter++;
         if (tryCounter > 1) {
             JOptionPane.showMessageDialog(gameWindowFrame, "To start new game press New game button");
             return;
         }
 
-        final String pathPGN = "src/main/resources/2021.04.14_wPLastNbPlayerLastN.pgn";
-
-        File myFilePGN = new File(pathPGN);
         int counterTitle = 0;
         int counter = 0;
         try (
@@ -164,7 +187,7 @@ public class GameWindowGameView {
                 if (line == null) {
                     break;
                 }
-                if (counterTitle < 7) {
+                if (counterTitle < 8) {
                     counterTitle++;
                     continue;
                 }
@@ -174,9 +197,14 @@ public class GameWindowGameView {
                 String[] itemsLine = line.split(" ");
 
                 for (int i = 0; i < itemsLine.length; i++) {
+
                     counter++;
                     if (i % 3 == 0) {
                         whiteIsActive = true;
+//                        String s = itemsLine[i].replace(".", " ").trim();
+//                        if (Integer.parseInt(s) % 2 != 0 && Integer.parseInt(s) != 1) {
+//                            sb.append("\n");
+//                        }
                         counter--;
                         continue;
                     }
@@ -193,7 +221,6 @@ public class GameWindowGameView {
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Error occur in loading Game", ex);
         }
-        //System.out.println("counter: " + counter);
         boardPanel.setCounter(counter);
         textArea.setText(gameView);
         gameWindowBasic.setGameView(gameView);
@@ -208,26 +235,7 @@ public class GameWindowGameView {
                     JOptionPane.showMessageDialog(savePNG, "Only for play game mode");
                     return;
                 }
-                File myFilePGN = null;
-
-                final String pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setCurrentDirectory(new File(pathPGN));
-                int result = fileChooser.showOpenDialog(gameWindowFrame);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    myFilePGN = fileChooser.getSelectedFile();
-                }
-
-                try {
-                    FileWriter writer = new FileWriter(myFilePGN, true);
-                    BufferedWriter bw = new BufferedWriter(writer);
-                    gameView = gameWindowBasic.getGameView();
-                    bw.write(gameView);
-                    bw.close();
-                } catch (IOException ex) {
-                    logger.log(Level.SEVERE, "Error occur in saving Game Report", ex);
-                    ex.printStackTrace();
-                }
+                saveGame(winner);
             }
         });
         fileMenu.add(savePNG);
@@ -245,7 +253,7 @@ public class GameWindowGameView {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to quit?",
+                        "Do you want to quit?",
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -299,8 +307,23 @@ public class GameWindowGameView {
 
                 it.next(x);
                 boolean wasKilled = element.contains("x");
-
-                String[] itemsSubLine = getSubTegs(element);
+////
+                if (element.contains("+")) {
+                    element = element.replace("+", " ").trim();
+                }
+                if (element.contains("#")) {
+                    element = element.replace("#", " ").trim();
+                }
+  ////              
+                boolean changePawn = false;
+                //String[] tagArr = {element};
+                trimedTag = element;
+                if (trimTagsEnd()) {
+                    changePawn = true;
+                }
+                //String[] itemsSubLine = getSubTegs(element);
+                String[] itemsSubLine = getSubTegs(trimedTag);
+                
                 if (itemsSubLine[0].equals("O")) {
                     doCastling(itemsSubLine, false);
                     boardPanel.repaint();
@@ -311,6 +334,14 @@ public class GameWindowGameView {
                 Tile finTilef1 = tile;
                 setCurrentTile(itemsSubLine[1]);
                 currentPiece = tile.getCurrentPiece();
+                if (changePawn) {
+                    int c = currentPiece.getColor();
+                    tile.removePiece();
+                    currentPiece = null;
+                    Pawn newPawn = new Pawn(c, tile, true);
+                    tile.setCurrentPiece(newPawn);
+                    currentPiece = newPawn;
+                }
                 gameManager.move(currentPiece, finTilef1, tags, removedPieces);
 
                 gameManager.addLastMove(tile, 0);
@@ -344,15 +375,19 @@ public class GameWindowGameView {
                     boardPanel.repaint();
                 }
             }
-        });
+        }
+        );
 
         final JButton nGame = new JButton("New game");
-        nGame.addActionListener(new ActionListener() {
+
+        nGame.addActionListener(
+                new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e
+            ) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to load a new game?",
+                        "Do want to load a new game?",
                         "Confirm new game", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -360,12 +395,17 @@ public class GameWindowGameView {
                     gameWindowFrame.dispose();
                 }
             }
-        });
+        }
+        );
 
         buttons.add(previous);
+
         buttons.add(next);
+
         buttons.add(nGame);
+
         buttons.add(quit);
+
         buttons.setPreferredSize(buttons.getMinimumSize());
         return buttons;
 
@@ -399,9 +439,14 @@ public class GameWindowGameView {
             tag = tag.replace("#", " ").trim();
         }
 
-        boolean wasKilled = tag.contains("x");
+        trimedTag = tag;
+        boolean changePawn = trimTagsEnd();
+        
+        //boolean wasKilled = tag.contains("x");
+        boolean wasKilled = trimedTag.contains("x");
 
-        String[] itemsSubLine = getSubTegs(tag);
+        //String[] itemsSubLine = getSubTegs(tag);
+        String[] itemsSubLine = getSubTegs(trimedTag);
         if (itemsSubLine == null) {
             return;
         }
@@ -412,6 +457,7 @@ public class GameWindowGameView {
         }
 
         setCurrentTile(itemsSubLine[0]);
+        Tile startTile = tile;
         currentPiece = tile.getCurrentPiece();
         gameManager.addLastMove(tile, 0);
 
@@ -421,11 +467,15 @@ public class GameWindowGameView {
         gameManager.move(currentPiece, tile, tags, removedPieces);
         CheckMatePositionControl checkMatePositionControl = gameManager.getCheckMatePositionControl();
         checkMatePositionControl.setWhiteIsActive(whiteIsActive);
-        if (checkMatePositionControl.isItCheck()
+        if (changePawn) {
+            gameManager.changePawn(tile, whiteIsActive, x, tags);
+            tags.add(s);
+        }
+        if (checkMatePositionControl.doesMoveCauseCheck(currentPiece, tile, startTile, false)
                 && checkMatePositionControl.canEscapeCheck()) {
 
             tags.add("+");
-        } 
+        }
 //        else {
 //            if (whiteIsActive) {
 //                winer = "1 - 0";
@@ -546,33 +596,203 @@ public class GameWindowGameView {
         return textPanel;
     }
 
+    /**
+     *
+     * @return
+     */
     public JTextArea getTextArea() {
         return textArea;
     }
 
+    /**
+     *
+     * @param gameView
+     */
     public void setGameView(String gameView) {
         this.gameView = gameView;
     }
 
-    public void endGame(String winner) {
+    /**
+     *
+     * @param winner
+     * @param byTime
+     */
+    public void endGame(String win, boolean byTime) {
+        this.winner = win;
+        int n;
         if (winner.equals("1 - 0")) {
-//            if (timer != null) {
-//                timer.stop();
-//            }
-            int n = JOptionPane.showConfirmDialog(
+            n = JOptionPane.showConfirmDialog(
                     gameWindowFrame,
-                    "White wins by checkmate!",
-                    "White wins!", JOptionPane.DEFAULT_OPTION);
+                    "White wins by checkmate! Save the game? \n"
+                    + "Choosing \"No\" quits the game.",
+                    "White wins!", JOptionPane.YES_NO_OPTION);
 
         } else {
-//            if (timer != null) {
-//                timer.stop();
-//            }
-            int n = JOptionPane.showConfirmDialog(
+
+            n = JOptionPane.showConfirmDialog(
                     gameWindowFrame,
-                    "Black wins by checkmate!",
-                    "Black wins!", JOptionPane.DEFAULT_OPTION);
+                    "Black wins by checkmate! Save the game? \n"
+                    + "Choosing \"No\" quits the game.",
+                    "Black wins!", JOptionPane.YES_NO_OPTION);
 
         }
+        if (n == JOptionPane.YES_OPTION) {
+            saveGame(winner);
+        } else {
+            gameWindowFrame.dispose();
+        }
+    }
+
+    private void saveGame(String result) {
+
+        setMyFilePGN();
+
+        try {
+            PrintWriter writer = new PrintWriter(myFilePGN);
+            writer.print("");
+            writer.close();
+            writer = new PrintWriter(myFilePGN);
+
+            initialGameData.clear();
+            StringBuilder sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Event \"").append(pl.getCupName()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Site \"").append(pl.getCity() + ", ").append(pl.getCountry()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Date \"").append(pl.getDate()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Round \"").append(pl.getRound()).append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[White \"").append(pl.getWpLastName())
+                    .append(", ")
+                    .append(pl.getWpName())
+                    .append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Black \"").append(pl.getBpLastName())
+                    .append(", ")
+                    .append(pl.getBpName())
+                    .append("\"]"));
+
+            sb = new StringBuilder();
+            addToInitialGameData(sb.append("[Result \"").append(result)
+                    .append("\"]")
+                    .append("\n"));
+
+            for (StringBuilder element : initialGameData) {
+                String str = element.toString();
+                writer.println(str);
+            }
+            saveGameData(writer);
+
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Can't save game to file", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    private void setMyFilePGN() {
+
+//        if (myFilePGN != null) {
+//            return;
+//        }
+        myFilePGN = new File("src/main/resources/"
+                + pl.getDate()
+                + "_"
+                + pl.getWpLastName()
+                + pl.getBpLastName()
+                + ".pgn");
+
+        pathPGN = "C:/Users/kira/OneDrive/Dokumenty/NetBeansProjects/ChessGame_2021/src/main/resources";
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(pathPGN));
+        int result = fileChooser.showOpenDialog(gameWindowFrame);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            myFilePGN = fileChooser.getSelectedFile();
+        }
+    }
+
+    private void fillInInitialGameData() {
+
+        initialGameData.clear();
+        StringBuilder sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Event \"").append(pl.getCupName()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Site \"").append(pl.getCity() + ", ").append(pl.getCountry()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Date \"").append(pl.getDate()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Round \"").append(pl.getRound()).append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[White \"").append(pl.getWpLastName())
+                .append(", ")
+                .append(pl.getWpName())
+                .append("\"]"));
+
+        sb = new StringBuilder();
+        addToInitialGameData(sb.append("[Black \"").append(pl.getBpLastName())
+                .append(", ")
+                .append(pl.getBpName())
+                .append("\"]"));
+    }
+
+    private void addToInitialGameData(StringBuilder sb) {
+        initialGameData.add(sb);
+    }
+
+    private void saveGameData(PrintWriter writer) {
+
+        try {
+            BufferedWriter bw = new BufferedWriter(writer);
+            gameView = gameWindowBasic.getGameView();
+            bw.write(gameView);
+            bw.close();
+
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Can't find file", ex);
+            ex.printStackTrace();
+        }
+    }
+
+    private boolean trimTagsEnd() {
+
+        boolean b = false;
+       //String tag = tagArr[0];
+        if (trimedTag.endsWith("R")) {
+            trimedTag = trimedTag.replace("R", " ").trim();
+            x = 1;
+            s = "R";
+            b = true;
+        }
+        if (trimedTag.endsWith("N")) {
+            trimedTag = trimedTag.replace("N", " ").trim();
+            x = 3;
+            s = "N";
+            b = true;
+        }
+        if (trimedTag.endsWith("B")) {
+            trimedTag = trimedTag.replace("B", " ").trim();
+            x = 2;
+            s = "B";
+            b = true;
+        }
+        if (trimedTag.endsWith("Q")) {
+            trimedTag = trimedTag.replace("Q", " ").trim();
+            x = 0;
+            s = "Q";
+            b = true;
+
+        }
+        return b;
     }
 }

@@ -4,7 +4,6 @@ import cz.cvut.fel.pjv.chessgame.Piece;
 import cz.cvut.fel.pjv.chessgame.Tile;
 import cz.cvut.fel.pjv.start.CheckMatePositionControl;
 import cz.cvut.fel.pjv.start.GameManager;
-//import cz.cvut.fel.pjv.start.Clock;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridLayout;
@@ -14,18 +13,17 @@ import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-//import java.util.ArrayList;
 import java.util.HashSet;
-//import java.time.Clock;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-//import java.util.Set;
-//import java.util.Stack;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-//import javax.swing.*;
+/**
+ *
+ * @author kira
+ */
 @SuppressWarnings("serial")
 public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
 
@@ -33,6 +31,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private TileComponent currentTileComponent;
     private Piece currentPiece;
     final private GameWindowBasic gameWindowBasic;
+
     private int computer = -1;
     final private GameManager gameManager = GameManager.getInstance();
     final private CheckMatePositionControl checkMatePositionControl;
@@ -40,7 +39,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private LinkedList<Piece> removedPieces = new LinkedList<>();
     private List<Piece> gmRemovedPieces;
     private GameStateEnum gameState = null;
-    private String winer = "";
+    private String winner = "";
 
     private int xB = 0;
     private int yB = 0;
@@ -49,6 +48,11 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private int counter = 0;
     private HashSet<String> tags = new HashSet<String>();
 
+    /**
+     *
+     * @param gameWindow
+     * @param gameState
+     */
     public BoardPanel(GameWindowBasic gameWindow, GameStateEnum gameState) {
 
         this.boardTileComponents = new TileComponent[8][12];
@@ -119,6 +123,11 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         }
 
         if (gameState == GameStateEnum.AI_MODEL) {
+            if (gameWindowBasic.getComp().getComputer() == -1) {
+                JOptionPane.showMessageDialog(currentTileComponent, "Set computer color");
+                return;
+            }
+
             if (currentPiece.getColor() == 0 && computer == 0 && !whiteIsActive) {
                 return;
             }
@@ -177,6 +186,8 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             if (StartMenu.isManual) {
                 if (currentTile.getIsEmpty()) {
                     gameManager.move(currentPiece, currentTile, tags, removedPieces);
+                    currentPiece.setWasMoved(false);
+                    currentPiece.setWasRemoved(false);
 
                     gameManager.addLastMove(startTile, 0);
                     gameManager.addLastMove(currentTile, 1);
@@ -210,14 +221,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 gameManager.addLastMove(startTile, 0);
                 gameManager.addLastMove(currentTile, 1);
 
-                if (checkMatePositionControl.isItCheck()) {
+                if (checkMatePositionControl.doesMoveCauseCheck(currentPiece, currentTile, startTile, false)) {
                     if (checkMatePositionControl.canEscapeCheck()) {
                         tags.add("+");
                     } else {
                         if (whiteIsActive) {
-                            winer = "1 - 0";
+                            winner = "1 - 0";
                         } else {
-                            winer = "0 - 1";
+                            winner = "0 - 1";
                         }
                         tags.add("#");
                         setGameView(currentPiece, currentTile, startTile);
@@ -225,7 +236,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                         repaint();
                         this.removeMouseListener(this);
                         this.removeMouseMotionListener(this);
-                        gameWindowBasic.endGame(winer);
+                        gameWindowBasic.endGame(winner, false);
                         return;
                         //repaint();
                     }
@@ -242,7 +253,8 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                                 "Click a button to convert this pawn to another piece", "Click a button",
                                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-                        gameManager.changePawn(currentPiece, currentTile, whiteIsActive, x);
+                        //gameManager.changePawn(currentPiece, currentTile, whiteIsActive, x, tags);
+                        gameManager.changePawn(currentTile, whiteIsActive, x, tags);
 
                     }
 
@@ -257,9 +269,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                     repaintTile(tileRemovedPiece);
                 }
 
-                if (winer == "1/2 - 1/2") {
-                    tags.add("=");
-                }
                 setGameView(currentPiece, currentTile, startTile);
                 whiteIsActive = !whiteIsActive;
 
@@ -315,6 +324,16 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
             sb.append(currentTile.coordinatesString());
 
+            if (tags.contains("Q") || tags.contains("R") || tags.contains("B") || tags.contains("N")) {
+                sb.append("Q");
+            } else if (tags.contains("R")) {
+                sb.append("R");
+            } else if (tags.contains("B")) {
+                 sb.append("B");
+            } else if (tags.contains("N")) {
+                sb.append("N");
+            }
+            
             if (tags.contains("#")) {
                 sb.append("#");
             } else if (tags.contains("+")) {
@@ -327,6 +346,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             sb.append("\n");
         }
 
+        currentPiece = null;
         tags.clear();
 
         gameWindowBasic.setGameView(sb.toString());
@@ -344,6 +364,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public Tile addRemovedPiecesToLSP() {
         //int color = (whiteIsActive) ? 0 : 1;
         gmRemovedPieces = gameManager.getRemovedPieces();
@@ -417,23 +441,40 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         tc.repaint();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isWhiteIsActive() {
         return whiteIsActive;
     }
 
+    /**
+     *
+     * @param whiteIsActive
+     */
     public void setWhiteIsActive(boolean whiteIsActive) {
         this.whiteIsActive = whiteIsActive;
     }
 
-    public Piece getCurrentPiece() {
+    private Piece getCurrentPiece() {
         return currentPiece;
     }
 
+    /**
+     *
+     * @return
+     */
     public HashSet<String> getTags() {
         return tags;
     }
 
     //Computer's game
+
+    /**
+     *
+     * @param computer
+     */
     public void doTah(int computer) {
 
         if (computer == 1 && !whiteIsActive) {
@@ -474,7 +515,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         gameManager.addLastMove(startTile, 0);
         gameManager.addLastMove(finTile, 1);
 
-        if (checkMatePositionControl.isItCheck()) {
+        if (checkMatePositionControl.doesMoveCauseCheck(currentPiece, finTile, startTile, false)) {
             tags.add("+");
         }
         setGameView(currentPiece, finTile, startTile);
@@ -482,9 +523,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         this.repaint();
     }
 
-    public void setComputer(int computer) {
-        this.computer = computer;
-    }
+//    public void setComputer(int computer) {
+//        this.computer = computer;
+//    }
+
+    /**
+     *
+     * @param counter
+     */
 
     public void setCounter(int counter) {
         this.counter = counter;
