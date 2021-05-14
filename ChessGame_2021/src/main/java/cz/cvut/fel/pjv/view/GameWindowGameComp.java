@@ -85,7 +85,7 @@ public class GameWindowGameComp {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to quit?",
+                        "Do you want to quit?",
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
@@ -99,7 +99,7 @@ public class GameWindowGameComp {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         gameWindowFrame,
-                        "Are you sure you want to upload a new game?",
+                        "Do you want to load a new game?",
                         "Confirm new game", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {

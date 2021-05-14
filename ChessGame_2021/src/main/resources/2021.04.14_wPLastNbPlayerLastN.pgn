@@ -1,12 +1,15 @@
-[Event "cup's name"]
-[Site "city"]
-[Date "2021.04.14"]
-[Round "round"]
-[White "wPLastN, wPN"]
-[Black "bPlayerLastN, bPName"]
+[Event "World Championship Match"]
+[Site "Moscow, Russia"]
+[Date "2021.05.13"]
+[Round "32"]
+[White "Kasparov, Garry"]
+[Black "Karpov, Anatoly"]
+[Result ]
 
-1. e2-e4 e7-e5 2. Ng1-f3 f7-f6 
-3. Nf3xe5 f6xNe5 4. Qd1-h5+ Ke8-e7 
-5. Qh5xe5+ Ke7-f7 6. Bf1-c4+ d7-d5 
-7. Bc4xd5+ Kf7-g6 8. h2-h4 h7-h5
-9. Bd5xb7 Bc8xBb7 10. Qe5-f5+ Kg6-h6 
+1. d2-d4 Ng8-f6 2. c2-c4 e7-e6 
+3. g2-g3 d7-d5 4. Bf1-g2 Bf8-e7 
+5. Ng1-f3 O-O 6. O-O d5xc4 
+7. Qd1-c2 a7-a5 8. a2-a4 Bc8-d7 
+9. Qc2xc4 Bd7-c6 10. Bc1-g5 Ra8-a7 
+11. Nb1-c3 Nb8-a6 12. Ra1-c1 Qd8-d6 
+13. Nf3-e5 Bc6xBg2 

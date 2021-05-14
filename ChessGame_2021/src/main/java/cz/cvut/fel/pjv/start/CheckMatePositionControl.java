@@ -597,4 +597,13 @@ public class CheckMatePositionControl {
         return bKing;
     }
 
+    public void setKing(Piece king) {
+        if (king.getColor() == 1 ) {
+            this.wKing = king;
+        }
+        if (king.getColor() == 0 ) {
+            this.bKing = king;
+        }
+    }
+
 }

@@ -1,19 +1,19 @@
 package cz.cvut.fel.pjv.chessgame;
 
 import cz.cvut.fel.pjv.start.GameManager;
-import cz.cvut.fel.pjv.view.GameWindowGameAuto;
+//import cz.cvut.fel.pjv.view.GameWindowGameAuto;
 import cz.cvut.fel.pjv.view.StartMenu;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedList;
+//import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
+//import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toList;
 import javax.imageio.ImageIO;
 
@@ -267,7 +267,7 @@ public abstract class Piece {
      * @param removedPieces
      * @return true
      */
-    public boolean move(Tile finTile, HashSet<String> tags, List<Piece> removedPieces) {
+    public boolean move(Tile finTile, HashSet<String> tags, List<Piece> lastRemoved) {
 
         if (!StartMenu.isManual) {
             wasMoved = true;
@@ -277,7 +277,7 @@ public abstract class Piece {
             Piece removedPiece = finTile.getCurrentPiece();
             removedPiece.setCurrentTile(null);
             removedPiece.wasRemoved = true;
-            removedPieces.add(removedPiece);
+            lastRemoved.add(removedPiece);
             finTile.removePiece();
 
             currentTile.removePiece();

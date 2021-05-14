@@ -54,7 +54,9 @@ public class GameManager {
      * Creates the CheckMatePositionControl instance 
      */
     public void initializeCheckMatePositionControl() {
+
         checkMatePositionControl = new CheckMatePositionControl();
+
     }
 
     private Tile createTile(int color, int x, int y) {
@@ -271,7 +273,6 @@ public class GameManager {
 //    }
     /**
      * Exchanges the pawn for a selected piece 
-     * @param currentPiece current piece
      * @param currentTile current piece tile
      * @param whiteIsActive white is on tag
      * @param x int index of the piece that player wants to get in exchange for passed pawn

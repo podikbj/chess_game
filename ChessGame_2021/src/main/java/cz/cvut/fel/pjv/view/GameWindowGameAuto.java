@@ -45,15 +45,7 @@ public class GameWindowGameAuto {
     private GameWindowBasic gameWindowBasic;
     private JFrame gameWindowFrame;
     private BoardPanel boardPanel;
-
-    /**
-     *
-     */
     public Clock blackClock = null;
-
-    /**
-     *
-     */
     public Clock whiteClock = null;
 
     private Thread wThread = null;

@@ -61,7 +61,8 @@ public class GameWindowGameView {
     //private boolean firstStep = true;
     private final JMenu fileMenu = new JMenu("File");
     private int tryCounter = 0;
-    private LinkedList<Piece> removedPieces = new LinkedList<Piece>();
+    //private LinkedList<Piece> removedPieces = new LinkedList<Piece>();
+    private LinkedList<Piece> lastRemoved = new LinkedList<>();
     private GameStateEnum gameState;
 
     private Players pl = Players.getInstance();
@@ -342,7 +343,7 @@ public class GameWindowGameView {
                     tile.setCurrentPiece(newPawn);
                     currentPiece = newPawn;
                 }
-                gameManager.move(currentPiece, finTilef1, tags, removedPieces);
+                gameManager.move(currentPiece, finTilef1, tags, lastRemoved);
 
                 gameManager.addLastMove(tile, 0);
                 gameManager.addLastMove(finTilef1, 1);
@@ -368,7 +369,7 @@ public class GameWindowGameView {
                             .findFirst().get();
 
                     currentPiece = tile.getCurrentPiece();
-                    gameManager.move(currentPiece, finTilef2, tags, removedPieces);
+                    gameManager.move(currentPiece, finTilef2, tags, lastRemoved);
                     gameManager.addLastMove(tile, 0);
                     gameManager.addLastMove(finTilef2, 1);
 
@@ -464,7 +465,7 @@ public class GameWindowGameView {
         setCurrentTile(itemsSubLine[1]);
 
         tags.clear();
-        gameManager.move(currentPiece, tile, tags, removedPieces);
+        gameManager.move(currentPiece, tile, tags, lastRemoved);
         CheckMatePositionControl checkMatePositionControl = gameManager.getCheckMatePositionControl();
         checkMatePositionControl.setWhiteIsActive(whiteIsActive);
         if (changePawn) {
@@ -572,7 +573,7 @@ public class GameWindowGameView {
             setCurrentTile(finish[3]);
         }
         gameManager.getCheckMatePositionControl().setWhiteIsActive(whiteIsActive);
-        gameManager.move(currentPiece, tile, tags, removedPieces);
+        gameManager.move(currentPiece, tile, tags, lastRemoved);
 
 //        gameManager.addLastMove(startTile, 0);
 //        gameManager.addLastMove(tile, 1);
@@ -581,7 +582,7 @@ public class GameWindowGameView {
             tags.add("R");
         }
 
-        gameManager.doCastling(tile, tags, removedPieces);
+        gameManager.doCastling(tile, tags, lastRemoved);
     }
 
     private JPanel textJPanel() {
