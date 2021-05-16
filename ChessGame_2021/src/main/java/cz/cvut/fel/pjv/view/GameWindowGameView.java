@@ -9,6 +9,7 @@ import cz.cvut.fel.pjv.start.GameManager;
 import cz.cvut.fel.pjv.start.MovesIterator;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -133,6 +134,7 @@ public class GameWindowGameView {
                 gameWindowFrame.setTitle("View game mode");
                 loadGameFromFile();
                 boardPanel.repaint();
+
             }
         });
         fileMenu.add(openPNG);
@@ -316,7 +318,6 @@ public class GameWindowGameView {
                 }
 
                 boolean changePawn = false;
-                //String[] tagArr = {element};
                 trimedTag = element;
                 if (trimTagsEnd()) {
                     changePawn = true;
@@ -589,6 +590,7 @@ public class GameWindowGameView {
 
     /**
      * Setter for gameView
+     *
      * @param gameView
      */
     public void setGameView(String gameView) {
@@ -597,6 +599,7 @@ public class GameWindowGameView {
 
     /**
      * Ends game
+     *
      * @param winner final game score
      * @param byTime true if game was played by time
      */

@@ -378,7 +378,7 @@ public class GameManager {
      */
     public List<Tile> getAllowedTiles(Piece p) {
 
-        List<Tile> tempTList = tileList.stream()
+        List<Tile> tempList = tileList.stream()
                 .filter(t -> t.getX() > 3)
                 .filter((t) -> {
                     boolean x = false;
@@ -390,8 +390,17 @@ public class GameManager {
                     return x;
                 })
                 .collect(toList());
+        
+        List<Tile> tp = new ArrayList<>();
+        for (Tile t : tempList) {
+            if (p.isMoveAllowed(t)){
+                tp.add(t);
+            }
+        }
 
-        return tempTList;
+        return tp;
+       
+        
     }
 
     /**
