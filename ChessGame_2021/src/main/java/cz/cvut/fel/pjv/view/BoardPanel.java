@@ -23,8 +23,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 /**
+ * Represents a chess board instance
  *
- * @author kira
  */
 @SuppressWarnings("serial")
 public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener {
@@ -53,9 +53,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     private final static Logger logger = Logger.getLogger(BoardPanel.class.getName());
 
     /**
+     * Constructor for chess board instance
      *
-     * @param gameWindow
-     * @param gameState
+     * @param gameWindow basic game window
+     * @param gameState current game state
      */
     public BoardPanel(GameWindowBasic gameWindow, GameStateEnum gameState) {
 
@@ -89,6 +90,11 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         this.setSize(new Dimension(600, 400));
     }
 
+    /**
+     * paint current component
+     *
+     * @param g
+     */
     @Override
     public void paintComponent(Graphics g) {
 
@@ -121,12 +127,22 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
+    /**
+     * Unused method
+     *
+     * @param e
+     */
     @Override
     public void mouseClicked(MouseEvent e
     ) {
 
     }
 
+    /**
+     * Provides piece move after mouse pressing
+     *
+     * @param e event thar occurs on curent element
+     */
     @Override
     public void mousePressed(MouseEvent e
     ) {
@@ -154,7 +170,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
             currentPiece = currentTile.getCurrentPiece();
 
             if (gameState == GameStateEnum.INITIAL_MANUAL_SETTING) {
-                //currentTileComponent.setDisplayPiece(false);
                 repaint();
                 return;
             }
@@ -185,10 +200,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
 
+    /**
+     * Provides piece move after mouse releasing
+     *
+     * @param e event thar occurs on curent element
+     */
     @Override
     public void mouseReleased(MouseEvent e
     ) {
-
         if (gameState == GameStateEnum.LOAD_VIEW) {
             return;
         }
@@ -201,7 +220,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
         if (currentPiece != null) {
 
-            //if (StartMenu.isManual) {
             if (StartMenu.gameState == GameStateEnum.INITIAL_MANUAL_SETTING) {
 
                 if (currentTile.getIsEmpty()) {
@@ -244,7 +262,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                         null,
                         "Do you want to provide castling?", "Confirmation castling",
                         JOptionPane.OK_CANCEL_OPTION);
-                //System.out.println("castling :" + castling);
             }
 
             if (gameManager.isMoveAllowed(currentPiece, currentTile, startTile, castling)) {
@@ -272,7 +289,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                         this.removeMouseMotionListener(this);
                         gameWindowBasic.endGame(winner, false);
                         return;
-                        //repaint();
+
                     }
 
                 }
@@ -287,7 +304,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                                 "Click a button to convert this pawn to another piece", "Click a button",
                                 JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-                        //gameManager.changePawn(currentPiece, currentTile, whiteIsActive, x, tags);
                         gameManager.changePawn(currentTile, whiteIsActive, x, tags);
                         currentPiece = null;
 
@@ -352,7 +368,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
                 if (lastRemoved == null && lastRemoved.size() == 0) {
                     return;
                 }
-                //String strP = lastRemoved.get(lastRemoved.size() - 1).toString();
                 String strP = lastRemoved.getLast().toString();
                 if (!strP.equals("P")) {
                     sb.append(strP);
@@ -402,11 +417,12 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     }
 
     /**
+     * Adds removed piece to left side panel
      *
-     * @return
+     * @return the tile from lsp the piece was placed on
      */
     public Tile addRemovedPiecesToLSP() {
-        //int color = (whiteIsActive) ? 0 : 1;
+
         gmRemovedPieces = gameManager.getRemovedPieces();
 
         Piece remP = null;
@@ -436,20 +452,31 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
+    /**
+     * Unused method
+     *
+     * @param e
+     */
     @Override
     public void mouseEntered(MouseEvent e
     ) {
-        //TileComponent tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Unused method
+     *
+     * @param e
+     */
     @Override
     public void mouseExited(MouseEvent e
     ) {
-        //TileComponent tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     * Corrects image position
+     *
+     * @param e
+     */
     @Override
     public void mouseDragged(MouseEvent e
     ) {
@@ -460,15 +487,17 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
 
+    /**
+     * Unused method
+     *
+     * @param e
+     */
     @Override
     public void mouseMoved(MouseEvent e
     ) {
-        //TileComponent tc = (TileComponent) this.getComponentAt(new Point(e.getX(), e.getY()));
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     private void doCastling(Tile currentTile) {
-        //System.out.println("castling3 :" + castling);
         Tile finishKingTile = checkMatePositionControl.doCastling(currentTile, tags, lastRemoved);
         repaintTile(finishKingTile);
     }
@@ -480,28 +509,30 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     }
 
     /**
+     * Getter for whiteIsActive
      *
-     * @return
+     * @return true if it is white turn
      */
     public boolean isWhiteIsActive() {
         return whiteIsActive;
     }
 
     /**
+     * Setter for whiteIsActive
      *
-     * @param whiteIsActive
+     * @param whiteIsActive true if it is white turn
      */
     public void setWhiteIsActive(boolean whiteIsActive) {
         this.whiteIsActive = whiteIsActive;
     }
 
-    private Piece getCurrentPiece() {
-        return currentPiece;
-    }
-
+//    private Piece getCurrentPiece() {
+//        return currentPiece;
+//    }
     /**
+     * Getter for tags
      *
-     * @return
+     * @return tags
      */
     public HashSet<String> getTags() {
         return tags;
@@ -509,8 +540,9 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
     //Computer's game
     /**
+     * Provides computer tag
      *
-     * @param computer
+     * @param computer: 1 for white, 0 for black
      */
     public void doTah(int computer) {
 
@@ -575,8 +607,9 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     }
 
     /**
+     * Setter for counter
      *
-     * @param counter
+     * @param counter contains start line number of pgn file
      */
     public void setCounter(int counter) {
         this.counter = counter;

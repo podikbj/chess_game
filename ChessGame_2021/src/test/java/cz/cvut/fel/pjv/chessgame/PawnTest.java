@@ -25,15 +25,11 @@ public class PawnTest {
         gameManager = GameManager.getInstance();
         gameManager.initializeTiles();
         tileList = gameManager.getTileList();
-//        HashSet<String> tags = new HashSet<String>();
-//        List<Piece> lastRemoved = new ArrayList<>();
 
     }
 
     @Test
     public void moveTest_IfMovIsEnPassantThenPawnWasCapture_ReturnTrue() {
-//        HashSet<String> tags = new HashSet<String>();
-//        List<Piece> lastRemoved = new ArrayList<>();
 
         Tile startWhPawn = tileList.stream().filter(p -> p.getX() == 4 && p.getY() == 3)
                 .findAny().get();

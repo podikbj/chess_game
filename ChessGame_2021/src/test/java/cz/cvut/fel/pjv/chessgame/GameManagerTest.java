@@ -21,16 +21,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 
 public class GameManagerTest {
-//
-//
-//    @Mock
-//    CheckMatePositionControl checkMatePositionControl;
-//
-//    @Mock
-//    Piece king;
-//
-//    @Mock
-//    Tile kingTile;
 
     private static GameManager gameManager;
     private static LinkedList<Tile> tileList;

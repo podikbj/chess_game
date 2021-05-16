@@ -9,7 +9,6 @@ import java.util.Stack;
 /**
  * Represents a King piece
  *
- * @author kira
  */
 public class King extends Piece {
 
@@ -44,9 +43,25 @@ public class King extends Piece {
         if (!finTile.getIsEmpty() && finTile.getCurrentPiece().toString().equals("K")) {
             return b;
         }
+        int color = (this.getColor() == 1) ? 0 : 1;
+        List<Piece> pieces = gameManager.getPieces(color);
+        Piece kingOpp = pieces.stream()
+                .filter(p -> p.toString().equals("K"))
+                .findFirst().get();
 
-        int diffX = finTile.getX() - currentTile.getX();
-        int diffY = finTile.getY() - currentTile.getY();
+        Tile kingOppTile = kingOpp.getCurrentTile();
+        int diffX = finTile.getX() - kingOppTile.getX();
+        int diffY = finTile.getY() - kingOppTile.getY();
+
+        if (Math.abs(diffX) == 1) {
+            return b;
+        }
+        if (Math.abs(diffY) == 1) {
+            return b;
+        }
+
+        diffX = finTile.getX() - currentTile.getX();
+        diffY = finTile.getY() - currentTile.getY();
 
         if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
             return b;
@@ -70,12 +85,13 @@ public class King extends Piece {
     }
 
     /**
-     * Move piece to finish tile. Marks captured piece as Removed. Adds captured piece to list
+     * Move piece to finish tile. Marks captured piece as Removed. Adds captured
+     * piece to list
      *
      * @param finTile current tag finish tile
      * @param tags set of special string symbols like "+, x, 0-0, 0-0-0"
      * @param lastRemoved list of removed pieces
-     * @return true always 
+     * @return true always
      */
     @Override
     public boolean move(Tile finTile, HashSet<String> tags, LinkedList<Piece> removedPieces) {

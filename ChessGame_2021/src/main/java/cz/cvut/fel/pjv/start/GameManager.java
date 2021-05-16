@@ -1,12 +1,12 @@
 package cz.cvut.fel.pjv.start;
 
 import cz.cvut.fel.pjv.chessgame.Bishop;
-import cz.cvut.fel.pjv.view.BoardPanel;
+//import cz.cvut.fel.pjv.view.BoardPanel;
 import cz.cvut.fel.pjv.chessgame.King;
 import cz.cvut.fel.pjv.chessgame.Knight;
 import cz.cvut.fel.pjv.chessgame.Pawn;
 import cz.cvut.fel.pjv.chessgame.Piece;
-import cz.cvut.fel.pjv.chessgame.Players;
+//import cz.cvut.fel.pjv.chessgame.Players;
 import cz.cvut.fel.pjv.chessgame.Queen;
 import cz.cvut.fel.pjv.chessgame.Rook;
 import cz.cvut.fel.pjv.chessgame.Tile;
@@ -22,7 +22,6 @@ import static java.util.stream.Collectors.toList;
 /**
  * Represents a game manager. Performs the function of the MVC controller
  *
- * @author kira
  */
 public class GameManager {
 
@@ -31,7 +30,6 @@ public class GameManager {
     final private LinkedList<Tile> tileList = new LinkedList<Tile>();
 
     private List<Tile> tempTileList = new ArrayList<Tile>();
-    //private List<String> moveSequence = new ArrayList<String>();
     private CheckMatePositionControl checkMatePositionControl;
     private Tile[] lastMove = {null, null};
 
@@ -363,7 +361,7 @@ public class GameManager {
 
     /**
      *
-     * @return list of pieces removed from chess board
+     * @return list of pieces removed fromthe chess board
      */
     public List<Piece> getRemovedPieces() {
         List<Piece> removedPieceses = null;

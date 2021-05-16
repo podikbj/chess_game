@@ -34,6 +34,7 @@ import javax.swing.SwingUtilities;
 
 /**
  * Represents game window for general/initial manual setting game mode
+ *
  * @author kira
  */
 public class GameWindowGameAuto {
@@ -70,6 +71,7 @@ public class GameWindowGameAuto {
 
     /**
      * Constructor for GameWindowGameAuto game window instance.
+     *
      * @param gameWindowBasic basic game window
      * @param bp chess board
      */
@@ -118,7 +120,7 @@ public class GameWindowGameAuto {
         gameWindowFrame.setVisible(
                 true);
 
-        gameWindowFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        gameWindowFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private JMenuBar createMenuBar() {
@@ -177,8 +179,19 @@ public class GameWindowGameAuto {
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
+                    if (wThread == null && bThread == null) {
+                        gameWindowFrame.dispose();
+                        return;
+                    }
+
                     blackClock.setNull();
                     whiteClock.setNull();
+                    try {
+                        bThread.join();
+                        wThread.join();
+                    } catch (InterruptedException ex) {
+                        logger.log(Level.SEVERE, null, ex);
+                    }
                     gameWindowFrame.dispose();
                 }
             }
@@ -188,7 +201,6 @@ public class GameWindowGameAuto {
 
         gGame.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                //StartMenu.isManual = false;
                 StartMenu.gameState = GameStateEnum.GENERAL;
             }
         });
@@ -202,7 +214,21 @@ public class GameWindowGameAuto {
                         "Confirm new game", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {
+
                     SwingUtilities.invokeLater(new StartMenu());
+                    if (wThread == null && bThread == null) {
+                        gameWindowFrame.dispose();
+                        return;
+                    }
+
+                    blackClock.setNull();
+                    whiteClock.setNull();
+                    try {
+                        bThread.join();
+                        wThread.join();
+                    } catch (InterruptedException ex) {
+                        logger.log(Level.SEVERE, null, ex);
+                    }
                     gameWindowFrame.dispose();
                 }
             }
@@ -224,7 +250,7 @@ public class GameWindowGameAuto {
                     sb.append(gameWindowBasic.getGameView());
                     sb.append(winner);
                     gameWindowBasic.setGameView(sb.toString());
-                    
+
                     textArea.setText(sb.toString());
 
                     n = JOptionPane.showConfirmDialog(
@@ -237,6 +263,7 @@ public class GameWindowGameAuto {
                     }
 
                     if (wThread == null && bThread == null) {
+                        gameWindowFrame.dispose();
                         return;
                     }
 
@@ -272,7 +299,6 @@ public class GameWindowGameAuto {
         JPanel wClockPanel = new JPanel();
         final JLabel wLabel = new JLabel("White");
         final JLabel wTime = new JLabel(whiteClock.getTime());
-        //wTime.setSize(new Dimension(20, 15));
 
         JPanel bClockPanel = new JPanel();
         final JLabel bLabel = new JLabel("Black");
@@ -322,6 +348,7 @@ public class GameWindowGameAuto {
 
     /**
      * Getter for textArea
+     *
      * @return
      */
     public JTextArea getTextArea() {
@@ -330,6 +357,7 @@ public class GameWindowGameAuto {
 
     /**
      * Setter for gameView
+     *
      * @param gameView
      */
     public void setGameView(String gameView) {
@@ -338,6 +366,7 @@ public class GameWindowGameAuto {
 
     /**
      * Getter for gameWindowFrame
+     *
      * @return
      */
     public JFrame getGameWindowFrame() {
@@ -346,6 +375,7 @@ public class GameWindowGameAuto {
 
     /**
      * Ends game
+     *
      * @param winner final game score
      * @param byTime true if game was played by time
      */
@@ -374,13 +404,23 @@ public class GameWindowGameAuto {
         if (n == JOptionPane.YES_OPTION) {
             saveGame(winner);
         } else {
-            gameWindowFrame.dispose();
+            if (wThread == null && bThread == null) {
+                gameWindowFrame.dispose();
+                return;
+            }
+
+            blackClock.setNull();
+            whiteClock.setNull();
+            try {
+                bThread.join();
+                wThread.join();
+            } catch (InterruptedException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
         }
 
         if (wThread == null && bThread == null) {
-            return;
-        }
-        if (wThread == null && bThread == null) {
+            gameWindowFrame.dispose();
             return;
         }
 
@@ -514,14 +554,15 @@ public class GameWindowGameAuto {
     }
 
     /**
-     * Provides synchronized decreasing  gameIsOver
+     * Provides synchronized decreasing gameIsOver
      */
     public synchronized void decrementGameIsOver() {
         this.gameIsOver--;
     }
 
     /**
-     * Provides synchronized getting  gameIsOver
+     * Provides synchronized getting gameIsOver
+     *
      * @return gameIsOver
      */
     public synchronized int getGameIsOver() {

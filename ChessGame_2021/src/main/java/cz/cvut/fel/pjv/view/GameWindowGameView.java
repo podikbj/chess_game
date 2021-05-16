@@ -132,6 +132,7 @@ public class GameWindowGameView {
                 }
                 gameWindowFrame.setTitle("View game mode");
                 loadGameFromFile();
+                boardPanel.repaint();
             }
         });
         fileMenu.add(openPNG);
@@ -151,6 +152,7 @@ public class GameWindowGameView {
                 loadGameFromFile();
                 boardPanel.setWhiteIsActive(whiteIsActive);
                 tags.clear();
+                boardPanel.repaint();
             }
         });
         fileMenu.add(openPNG);
@@ -200,10 +202,6 @@ public class GameWindowGameView {
                     counter++;
                     if (i % 3 == 0) {
                         whiteIsActive = true;
-//                        String s = itemsLine[i].replace(".", " ").trim();
-//                        if (Integer.parseInt(s) % 2 != 0 && Integer.parseInt(s) != 1) {
-//                            sb.append("\n");
-//                        }
                         counter--;
                         continue;
                     }

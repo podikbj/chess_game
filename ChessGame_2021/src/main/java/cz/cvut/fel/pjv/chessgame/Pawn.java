@@ -50,7 +50,13 @@ public class Pawn extends Piece {
 
         boolean areOccupiedTiles = true;
         if (isVerticalMove(finTile)) {
+            if(!finTile.getIsEmpty()) {
+                return false;
+            }
             areOccupiedTiles = isAnyTileIsOccupiedVerticalMove(finTile);
+            if (areOccupiedTiles) {
+              return false;
+            }
         }
         int diffX = finTile.getX() - currentTile.getX();
         int diffY = finTile.getY() - currentTile.getY();

@@ -28,7 +28,7 @@ public class StartMenu implements Runnable {
     /**
      * Constructor for start menu window instance.
      */
-    public static GameStateEnum gameState = GameStateEnum.GENERAL;
+    public static GameStateEnum gameState = GameStateEnum.LOAD_VIEW;
     private static Logger logger = Logger.getLogger(StartMenu.class.getName());
 
     /**
@@ -152,10 +152,20 @@ public class StartMenu implements Runnable {
         help.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(startWindow,
-                        "To begin a new game, input player names\n"
-                        + "next to the pieces. Set the clocks and\n"
-                        + "click \"Start\". Setting the timer to all\n"
-                        + "zeroes begins a new untimed game.",
+                        "To begin a new game, input player names.\n"
+                        + "Set the clocks and click \"Start\". \n"
+                        + "Setting the timer to all zeroes begins\n"
+                        + "a new untimed game.\n"
+                        + "View game mode allows you to load\n"
+                        + "a game from a pgn file and view it\n"
+                        + "step by step.\n"
+                        + "Play game after loading mode allows\n"
+                        + "you to load a game from a pgn file and\n"
+                        + "continue playing.\n"
+                        + "Play game mode allows you to play a game\n"
+                        + "between two players.\n"
+                        + "Play game with PC mode simulates a game\n"
+                        + "witha compiter.",
                         "How to play",
                         JOptionPane.PLAIN_MESSAGE);
             }
@@ -166,7 +176,7 @@ public class StartMenu implements Runnable {
             public void actionPerformed(ActionEvent e) {
                 int n = JOptionPane.showConfirmDialog(
                         startWindow,
-                        "Are you sure you want to quit?",
+                        "Do you want to quit?",
                         "Confirm quit", JOptionPane.YES_NO_OPTION);
 
                 if (n == JOptionPane.YES_OPTION) {

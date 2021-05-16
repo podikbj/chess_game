@@ -318,10 +318,15 @@ public class CheckMatePositionControl {
         Piece king = (whiteIsActive == true) ? bKing : wKing;
 
         for (Tile t : tempList) {
+            if (isKingTile(t)) {
+                return false;
+            }
+
             if (king.isMoveAllowed(t) && !kingMoveCauseCheck(t, king, false)) {
                 return b;
             }
         }
+
         return false;
     }
 
@@ -458,6 +463,9 @@ public class CheckMatePositionControl {
             return false;
         }
 
+        Tile startTile = king.getCurrentTile();
+        startTile.removePiece();
+
         Piece tempPiece = null;
         if (!finishTile.getIsEmpty()) {
 
@@ -465,24 +473,38 @@ public class CheckMatePositionControl {
             tempPiece.setCurrentTile(null);
             finishTile.removePiece();
 
+            finishTile.setCurrentPiece(king);
+            king.setCurrentTile(finishTile);
+
             for (Piece p : pieces) {
-                if (p == attacker) {
-                    continue;
-                }
+//                if (p == attacker) {
+//                    continue;
+//                }
                 if (p == tempPiece) {
                     continue;
                 }
                 if (p.isMoveAllowed(finishTile)) {
+                    finishTile.removePiece();
+                    king.setCurrentTile(startTile);
+                    startTile.setCurrentPiece(king);
+
                     finishTile.setCurrentPiece(tempPiece);
                     tempPiece.setCurrentTile(finishTile);
                     return true;
                 }
             }
+            finishTile.removePiece();
+            king.setCurrentTile(startTile);
+            startTile.setCurrentPiece(king);
+
             finishTile.setCurrentPiece(tempPiece);
             tempPiece.setCurrentTile(finishTile);
 
             return b;
         }
+
+        king.setCurrentTile(finishTile);
+        finishTile.setCurrentPiece(king);
 
         for (Piece p : pieces) {
             if (p.isMoveAllowed(finishTile)) {
@@ -490,6 +512,11 @@ public class CheckMatePositionControl {
                 break;
             }
         }
+
+        finishTile.removePiece();
+
+        king.setCurrentTile(startTile);
+        startTile.setCurrentPiece(king);
 
         return b;
 
